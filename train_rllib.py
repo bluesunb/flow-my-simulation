@@ -129,20 +129,20 @@ def setup_exps_rllib(flow_params,
             #config['evaluation_interval'] = 5
             config['buffer_size'] = 300000 #3e5
             config['timesteps_per_iteration'] = 3000
-            config['prioritized_replay']=True
+            config['prioritized_replay']=False
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['n_step'] = 1
-            config['actor_hiddens'] = [64, 64]
+            config['actor_hiddens'] = [400, 300]
             config['actor_lr'] = 0.00001  # in article 'ddpg'
-            config['critic_lr'] = 0.00001
-            config['critic_hiddens'] = [64, 64]
+            config['critic_lr'] = 0.0001
+            config['critic_hiddens'] = [400, 300]
             config['gamma'] = 0.99
-            config['model']['fcnet_hiddens'] = [64, 64]
+            config['model']['fcnet_hiddens'] = [256, 256]
             config['lr']=1e-5
             #exploration
             config['exploration_config']['final_scale'] = 0.02
-            config['exploration_config']['scale_timesteps'] = 1000000
+            config['exploration_config']['scale_timesteps'] = 1500000
             config['exploration_config']["initial_scale"] = 1.0
             config['exploration_config']["random_timesteps"] = 1000
             config['exploration_config']["stddev"] = 0.1
@@ -151,14 +151,15 @@ def setup_exps_rllib(flow_params,
             del config['exploration_config']['ou_sigma']
             config['exploration_config']['type']='GaussianNoise'
             # optimization
-            config['tau'] = 0.001
+            config['tau'] = 0.002
             config['l2_reg'] = 1e-6
-            config['train_batch_size'] = 512
+            config['train_batch_size'] = 256
             config['learning_starts'] = 0
             # evaluation
+            config['timesteps_per_iteration'] = 3000
             #config['evaluation_interval'] = 5
             config['buffer_size'] = 300000 #3e5
-            config['timesteps_per_iteration'] = 3000
+            config["prioritized_replay_beta_annealing_timesteps"]=200000
             config['prioritized_replay']=True
         else:# merge
             config['n_step'] = 1
