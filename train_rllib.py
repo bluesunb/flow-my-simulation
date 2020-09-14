@@ -258,7 +258,7 @@ def train_rllib(submodule, flags):
         flags.num_steps = 1500
         checkpoint_freq = 100
     elif alg_run=="DDPG":
-        flags.num_steps = 1
+        flags.num_steps = 800
         checkpoint_freq = 40
     
     exp_config = {
