@@ -12,6 +12,11 @@ from flow.utils.registry import env_constructor
 from flow.utils.rllib import FlowParamsEncoder, get_flow_params
 from flow.utils.registry import make_create_env
 from Experiment.experiment import Experiment
+import getpass
+
+
+
+
 
 
 def parse_args(args):
@@ -130,6 +135,7 @@ def setup_exps_rllib(flow_params,
             config['buffer_size'] = 300000 #3e5
             config['timesteps_per_iteration'] = 3000
             config['prioritized_replay']=False
+            config["prioritized_replay_beta_annealing_timesteps"]=200000
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['n_step'] = 1
@@ -251,7 +257,7 @@ def train_rllib(submodule, flags):
         flags.num_steps = 1500
         checkpoint_freq = 100
     elif alg_run=="DDPG":
-        flags.num_steps = 800
+        flags.num_steps = 1
         checkpoint_freq = 40
     
     exp_config = {
@@ -300,11 +306,12 @@ def train_rllib(submodule, flags):
     print("Training is Finished")
     print("total runtime: ", run_time)
     # modify params.json for testing that trained well
-    saved_experiment_json_path=os.path.join("~/ray_results",flow_params["exp_tag"],experiment_json)
+    saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
     # check file is existed
     with open(saved_experiment_json_path,'r') as f:
         experiment_data=json.load(f)
-        saved_params_json_path=experiment_data["checkpoints"][0]['logdir']
+        saved_params_json_path=os.path.join(experiment_data["checkpoints"][0]['logdir'],"params.json")
+        print("params.json is located at : ",saved_params_json_path)
     #params.json open and modify value of exploration and ringlength for visualizing
     with open(saved_params_json_path,'r')as fin:
         params_data=json.load(fin)

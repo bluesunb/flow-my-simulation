@@ -12,7 +12,7 @@ from flow.utils.registry import env_constructor
 from flow.utils.rllib import FlowParamsEncoder, get_flow_params
 from flow.utils.registry import make_create_env
 from Experiment.experiment import Experiment
-
+import getpass
 
 def parse_args(args):
     """Parse training options user can specify in command line.
@@ -194,18 +194,12 @@ def train_rllib(submodule, flags):
     print("Training is Finished")
     print("total runtime: ", run_time)
     # modify params.json for testing that trained well
-    saved_experiment_json_path=os.path.join("~/ray_results",flow_params["exp_tag"],experiment_json)
+    saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
     # check file is existed
-    if int(experiment_json[-6]=="9"):
-        experiment_json[-7]=str(int(experiment_json[-7])+1)
-        experiment_json[-6]="0"
-    else:
-        experiment_json[-6]=str(int(experiment_json[-6])+1)
-    if os.path.exists(os.path.dirname(saved_experiment_json_path)) ==False:
-        saved_experiment_json_path=os.path.join("~/ray_results",flow_params["exp_tag"],experiment_json)
     with open(saved_experiment_json_path,'r') as f:
         experiment_data=json.load(f)
-        saved_params_json_path=experiment_data["checkpoints"][0]['logdir']
+        saved_params_json_path=os.path.join(experiment_data["checkpoints"][0]['logdir'],"params.json")
+        print("params.json is located at : ",saved_params_json_path)
     #params.json open and modify value of exploration and ringlength for visualizing
     with open(saved_params_json_path,'r')as fin:
         params_data=json.load(fin)
