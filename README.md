@@ -19,7 +19,7 @@
     sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
 ```
 - Installation(for x86 Systems)
-In your browser, download the Anaconda installer for Linux (from https://anaconda.com/ )
+In your browser, download the Anaconda installer for Linux (from https://anaconda.com/ ), and unzip the file. 
 ``` shell script
 bash ~/Downloads/Anaconda3-2020.02-Linux-x86_64.sh
 ```
@@ -49,6 +49,7 @@ For checking the SUMO installation,
     sumo --version
     sumo-gui
 ```
+(if SUMO is installed, pop-up window of simulation is opened)
 - Testing your SUMO and Flow installation
 ```shell script
     conda activate flow
@@ -73,14 +74,23 @@ pip install -U ray==0.8.7
     conda activate flow
     python train_rllib.py singleagent_ring
 ```
+If RLlib is installed, turn off the terminal after confirming that "1"  appears in the part where iter is written in the terminal.
 
 
 #### Visualizing with Tensorboard
 To visualize the training progress:<br/>
 ```shell script
-tensorboard --logdir=~/ray_results
+tensorboard --logdir=~/ray_results stabilizing_the_ring
 ```
+
 If tensorboard is not installed, you can install with pip, by following command `pip install tensorboard`.
+
+### Downloads Flow-autonomous-driving repository 
+Download related file for training and visualizing:<br/>
+```shell script
+cd 
+git clone https://github.com/bmil-ssu/flow-autonomous-driving.git
+```
 
 
 ## How to Use
@@ -104,6 +114,9 @@ If you want to visualizing after training by rllib(ray),
     python ~/flow-autonomous-driving/visualizer_rllib.py 
     ~/home/user/ray_results/EXP_CONFIG/experiment_name/ number_of_checkpoints
 ```
+```experiment_name``` : Name of created folder when learning started.<br/>
+```number_of_checkpoints``` : 
+It means the name of the checkpoint folder created in the experiment_name folder. Enter the checkpoint (number) you want to visualize.
 ### Results for training Ring Network and Figure-Eight Network
 #### PPO (Proximal Policy Optimization)
 - Ring Network (ring length 220-270 for training)
