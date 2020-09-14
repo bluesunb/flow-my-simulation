@@ -80,7 +80,7 @@ If RLlib is installed, turn off the terminal after confirming that "1"  appears 
 #### Visualizing with Tensorboard
 To visualize the training progress:<br/>
 ```shell script
-tensorboard --logdir=~/ray_results stabilizing_the_ring
+tensorboard --logdir=~/ray_results singleagent_ring
 ```
 
 If tensorboard is not installed, you can install with pip, by following command `pip install tensorboard`.
