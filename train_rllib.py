@@ -134,8 +134,9 @@ def setup_exps_rllib(flow_params,
             #config['evaluation_interval'] = 5
             config['buffer_size'] = 300000 #3e5
             config['timesteps_per_iteration'] = 3000
-            config['prioritized_replay']=False
-            config["prioritized_replay_beta_annealing_timesteps"]=200000
+            config['prioritized_replay']=True
+            config["prioritized_replay_beta_annealing_timesteps"]=2200000
+            config['final_prioritized_replay_beta']=0.01
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['n_step'] = 1
@@ -305,8 +306,17 @@ def train_rllib(submodule, flags):
     run_time = stop_time-start_time
     print("Training is Finished")
     print("total runtime: ", run_time)
+
     # modify params.json for testing that trained well
     saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
+
+    if os.path.exists(os.path.dirname(saved_experiment_json_path)) ==False:
+        if int(experiment_json[-6]=="9"):
+            experiment_json[-7]=str(int(experiment_json[-7])+1)
+            experiment_json[-6]="0"
+        else:
+            experiment_json[-6]=str(int(experiment_json[-6])+1)
+        saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
     # check file is existed
     with open(saved_experiment_json_path,'r') as f:
         experiment_data=json.load(f)

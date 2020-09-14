@@ -216,6 +216,15 @@ def train_rllib(submodule, flags):
     # modify params.json for testing that trained well
     saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
     # check file is existed
+
+    if os.path.exists(os.path.dirname(saved_experiment_json_path)) ==False:
+        if int(experiment_json[-6]=="9"):
+            experiment_json[-7]=str(int(experiment_json[-7])+1)
+            experiment_json[-6]="0"
+        else:
+            experiment_json[-6]=str(int(experiment_json[-6])+1)
+        saved_experiment_json_path=os.path.join("/home",getpass.getuser(),"ray_results",flow_params["exp_tag"],experiment_json)
+        
     with open(saved_experiment_json_path,'r') as f:
         experiment_data=json.load(f)
         saved_params_json_path=os.path.join(experiment_data["checkpoints"][0]['logdir'],"params.json")
