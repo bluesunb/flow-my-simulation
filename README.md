@@ -41,7 +41,7 @@ We create a conda environment and installing Flow and its dependencies within th
 ```
 For Ubuntu 18.04: This command will install the SUMO for simulation.<br/>
 ```shell script
-scripts/setup_sumo_ubuntu1804.sh
+bash scripts/setup_sumo_ubuntu1804.sh
 ```
 For checking the SUMO installation,
 ```shell script
@@ -83,7 +83,7 @@ To visualize the training progress:<br/>
 tensorboard --logdir=~/ray_results singleagent_ring
 ```
 
-If tensorboard is not installed, you can install with pip, by following command `pip install tensorboard`.
+If tensorboard is not installed, you can install with pip, by following command `pip install tensorboardx`.
 
 ### Downloads Flow-autonomous-driving repository 
 Download related file for training and visualizing:<br/>
