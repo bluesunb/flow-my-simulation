@@ -171,7 +171,7 @@ python simulate.py osm_test
 
 After that, If you want to see those output file(XML), you could find in `~/flow/flow/core/kernel/debug/cfg/.net.cfg`
 
-### 설치 및 코드 사용 방법 (한글설명)
+### 설치 및 코드 실행 방법 (한글설명)
 (안내하는 모든 명령어는 컴퓨터를 초기화후, Ubuntu 18.04 환경을 설치한 뒤 Terminal에서 실행한다.)
 * Anaconda3 설치방법
 1. Anaconda3 설치 전 다음 명령어를 실행한다.
