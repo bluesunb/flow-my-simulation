@@ -175,151 +175,212 @@ After that, If you want to see those output file(XML), you could find in `~/flow
 (안내하는 모든 명령어는 컴퓨터를 초기화후, Ubuntu 18.04 환경을 설치한 뒤 Terminal에서 실행한다.)
 * Anaconda3 설치방법
 1. Anaconda3 설치 전 다음 명령어를 실행한다.
+```
    sudo apt-get update
    sudo apt-get upgrade   
    sudo apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6
-
+```
 2. Anaconda 사이트 또는 아래 링크에서 Anaconda installer(Linux version)를 다운로드한 후, 다음 명령어를 실행한다. (https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh)
+```
     sudo apt-get install python3 python python3-pip python-pip git
+```
 
 3. 압축을 해제한 설치파일(.sh)을 실행한다.
-  bash ~/Downloads/Anaconda3-2020.07-Linux-x86_64.sh
+ ```
+ bash ~/Downloads/Anaconda3-2020.07-Linux-x86_64.sh
+ ```
 (실행 파일을 다운받은 시기와 32bit, 64bit 여부에 따라 파일명이 달라질 수 있다. 설치 파일 실행 중 나오는 메시지는 ‘yes’, ‘enter’로 이용약관의 동의 및 설치 주소 확인 후, conda init 여부에는 ‘yes’를 순차적으로 입력한다.)
 
 4. 가상환경을 활성화하기 위해 anaconda 설치가 완료되면 terminal을 종료 후 다시 연다. 
 
 * Flow, SUMO 설치방법
 1. Flow github repository를 다운로드한다. 
+   ```
     conda
     git clone https://github.com/flow-project/flow.git
     cd flow
+    ```
 
 2. Anaconda를 이용해서 가상환경을 만들고 해당 환경 안에서 Flow 및 관련 파일을 설치한다. 
+    ```
     conda update –n base –c defualts conda
     conda env create –f environment.yml
     source ~/.bashrc
     conda activate flow
     python setup.py develop
-
+    ```
+    
 3. Ubuntu 18.04에서 simulation을 위해서 SUMO를 설치한다. 
+    ```
     bash scripts/setup_sumo_ubuntu1804.sh
-
+    ```
+    
 4. SUMO 설치를 확인한다. (SUMO가 설치된 경우, simulation 팝업 창이 열린다.)
+    ```
     which sumo
     sumo --version
     sumo-gui
-
+    ```
 5. FLOW 설치를 확인한다. 
+    ```
     conda activate flow
     python examples/simulate.py ring
+    ```
 
 * Pytorch 설치
 Pytorch 1.6.0 이상의 version을 설치한다. 
+```
    conda deactivate
    conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
+```
 
 * RLlib 설치 
 Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발생할 수 있다.)
+```
     conda activate flow
     pip install –U ray==0.8.7
     pip install dm-tree
-
+```
 2. RLlib 설치를 확인한다. 
+    ```
     conda activate flow
     python examples/train.py singleagent_ring
+    ```
 (RLlib이 설치된 경우, terminal에서 iter라고 쓰여진 부분에 1이 나타나는 것을 확인한 후, terminal을 끈다. )
 
 3. Training 과정은 iter라고 쓰여진 부분이 2 이후로 진행된 후부터 경향성을 확인할 수 있고, 이는 tensorboard를 이용하여 확인한다. 
+    ```
     cd
     cd ray_results
     tensorboard --logdir singleagent_ring
-  
-   만약 tensorboard가 설치가 되어 있지 않다면 다음 명령어를         입력하여 설치한다. 
+    ```
+   만약 tensorboard가 설치가 되어 있지 않다면 다음 명령어를 입력하여 설치한다. 
+   ```
    pip install tensorboardx
-
+   ```
+   
 * Flow-autonomous-drivng repository 다운로드
 1. 아래에서관련 파일을 다운로드한다.  
+```
     cd 
     git clone https://github.com/bmil-ssu/flow-autonomous-driving.git
-    
+```
+
+
 * Training: DDPT +Ring 
-1. 원형 도로에서 DDPG 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+1. 원형 도로에서 DDPG 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다.
+```
    cd flow-autonomous-driving
    python train_rllib.py singleagent_ring --algorithm ddpg
+```
 
 2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. (visualizing을 하기 위해서는 40번 이상의 iter를 돌려야 볼 수 있다. )
+```
    cd
    cd flow-autonomous-driving
    python visualizer_rllib.py ./ray_results/singleagents_ring/experiment_name  number_of_checkpoints
+```
  -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
  - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
    checkpoint(숫자)를 입력한다. 
+   
 3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+```
   cd
   cd ray_results
   tensorboard --logdir singleagent_ring
+```
 
 * High performance Example Code 
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+```
     cd
     cd flow-autonomous-driving/Code/Ring_Network-DDPG
     python visualizer_rllib.py ./results/DDPG_WaveAttenuationPOEnv-v0_0_2020-08-25_14-03-01r8h_t432 330
+```
 
 2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다. 
-   tensorboard —logdir results
-   
+```
+    tensorboard —logdir results
+```
+
+
+
 Training: PPO+figure8 
 1. 교차로 원형 혼합 도로 구조에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+```
   cd flow-autonomous-driving  
   python train_rllib.py singleagent_figure_eight
+```
 
-2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+    ```
    cd
    cd flow-autonomous-driving
    python visualizer_rllib.py ./ray_results/singleagent_figure_eight/experiment_name  number_of_checkpoints
+   ```
  -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
  - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
    checkpoint(숫자)를 입력한다. 
+   
 3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+```
   cd
   cd ray_results
   tensorboard --logdir singleagent_figure_eight
+```
+
 
 * High performance Example Code 
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+```
     cd
     cd flow-autonomous-driving/Code/Figure_Eight_Network-PPO
     python visualizer_rllib.py ./results/PPO_AccelEnv-v0_0_2020-09-04_13-47-12x8hecjmf 1500
+```
 
 2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다.  
-   tensorboard —logdir results
-   
+ ```
+    tensorboard —logdir results
+ ```
+ 
+ 
+ 
 * Training : PPO+ring
 1. 원형 도로에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+```
    cd flow-autonomous-driving
    python train_rllib.py singleagent_ring 
+```   
 
 2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+```
    cd
    cd flow-autonomous-driving
    python visualizer_rllib.py ./ray_results/singleagent_ring/experiment_name  number_of_checkpoints
+```   
  -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
  - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
    checkpoint(숫자)를 입력한다. 
 3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+```
   cd
   cd ray_results
   tensorboard --logdir singleagent_ring
+```
 
 * High performance Example Code 
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+```
    cd 
    cd flow-autonomous-driving/Code/Ring_Network-PPO
    python visualizer_rllib.py ./results/PPO_WaveAttenuationPOEnv-v0_0_2020-08-22_21-45-12bc33z2g0 1500
+```   
 
 2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다. 
+```
   tensorboard —logdir results
-
+```
 ## Contributors
 _BMIL at Soongsil Univ._
 Prof. Kwon (Minhae Kwon), 
