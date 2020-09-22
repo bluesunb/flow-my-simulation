@@ -238,11 +238,11 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
    pip install tensorboardx
 
 * Flow-autonomous-drivng repository 다운로드
-1. Training과 Visualizing을 하기 위해 첨부한 flow-autonomous-driving.zip 파일을 압축해제 시킨다. 만약 파일사용에 문제가 있으면 아래에서관련 파일을 다운로드한다.  
+1. 아래에서관련 파일을 다운로드한다.  
     cd 
     git clone https://github.com/bmil-ssu/flow-autonomous-driving.git
     
-* Training 
+* Training: DDPT +Ring 
 1. 원형 도로에서 DDPG 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
    cd flow-autonomous-driving
    python train_rllib.py singleagent_ring --algorithm ddpg
@@ -267,6 +267,58 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
 
 2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다. 
    tensorboard —logdir results
+   
+Training: PPO+figure8 
+1. 교차로 원형 혼합 도로 구조에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+  cd flow-autonomous-driving  
+  python train_rllib.py singleagent_figure_eight
+
+2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+   cd
+   cd flow-autonomous-driving
+   python visualizer_rllib.py ./ray_results/singleagent_figure_eight/experiment_name  number_of_checkpoints
+ -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
+ - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
+   checkpoint(숫자)를 입력한다. 
+3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+  cd
+  cd ray_results
+  tensorboard --logdir singleagent_figure_eight
+
+* High performance Example Code 
+1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+    cd
+    cd flow-autonomous-driving/Code/Figure_Eight_Network-PPO
+    python visualizer_rllib.py ./results/PPO_AccelEnv-v0_0_2020-09-04_13-47-12x8hecjmf 1500
+
+2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다.  
+   tensorboard —logdir results
+   
+* Training : PPO+ring
+1. 원형 도로에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+   cd flow-autonomous-driving
+   python train_rllib.py singleagent_ring 
+
+2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+   cd
+   cd flow-autonomous-driving
+   python visualizer_rllib.py ./ray_results/singleagent_ring/experiment_name  number_of_checkpoints
+ -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
+ - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
+   checkpoint(숫자)를 입력한다. 
+3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+  cd
+  cd ray_results
+  tensorboard --logdir singleagent_ring
+
+* High performance Example Code 
+1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+   cd 
+   cd flow-autonomous-driving/Code/Ring_Network-PPO
+   python visualizer_rllib.py ./results/PPO_WaveAttenuationPOEnv-v0_0_2020-08-22_21-45-12bc33z2g0 1500
+
+2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다. 
+  tensorboard —logdir results
 
 ## Contributors
 _BMIL at Soongsil Univ._
