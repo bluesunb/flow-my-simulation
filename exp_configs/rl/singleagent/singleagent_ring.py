@@ -5,9 +5,10 @@ vehicles in a variable length ring road.
 """
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
 from flow.core.params import VehicleParams, SumoCarFollowingParams
-from flow.controllers import RLController, IDMController, ContinuousRouter
-from flow.envs import WaveAttenuationPOEnv
+from flow.controllers import RLController, IDMController, ContinuousRouter, SimLaneChangeController
+from flow.envs import WaveAttenuationPOEnv, LaneChangeAccelPOEnv
 from flow.networks import RingNetwork
+from flow.core.params import SumoLaneChangeParams
 
 # time horizon of a single rollout
 HORIZON = 3000
@@ -26,12 +27,16 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         min_gap=0
     ),
+    #lane_change_params=SumoLaneChangeParams(
+    #    lane_change_mode=1621, ),
     routing_controller=(ContinuousRouter, {}),
     num_vehicles=21)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     routing_controller=(ContinuousRouter, {}),
+    #lane_change_params=SumoLaneChangeParams(
+    #    lane_change_mode=1621,),
     num_vehicles=1)
 
 flow_params = dict(
@@ -39,7 +44,7 @@ flow_params = dict(
     exp_tag="singleagent_ring",
 
     # name of the flow environment the experiment is running on
-    env_name=WaveAttenuationPOEnv,
+    env_name=LaneChangeAccelPOEnv, #WaveAttenuationPOEnv
 
     # name of the network class the experiment is running on
     network=RingNetwork,
@@ -57,12 +62,15 @@ flow_params = dict(
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        warmup_steps=750,
+        warmup_steps=10000,
         clip_actions=False,
         additional_params={
             "max_accel": 1,
             "max_decel": 1,
             "ring_length": [220, 270],
+            "lane_change_duration": 30,
+            "target_velocity": 10,
+            'sort_vehicles': False
         },
         evaluate=True,
     ),

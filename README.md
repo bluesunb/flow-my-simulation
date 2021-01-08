@@ -203,7 +203,7 @@ After that, If you want to see those output file(XML), you could find in `~/flow
 
 2. Anaconda를 이용해서 가상환경을 만들고 해당 환경 안에서 Flow 및 관련 파일을 설치한다. 
     ```
-    conda update –n base –c defualts conda
+    conda update –n base –c defaults conda
     conda env create –f environment.yml
     source ~/.bashrc
     conda activate flow

@@ -67,3 +67,4 @@ class myEnv(myEnv):
 
         # finally, we return the average of all these speeds as the reward
         return np.mean(speeds)
+

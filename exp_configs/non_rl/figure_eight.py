@@ -23,7 +23,7 @@ vehicles.add(
         speed_mode="obey_safe_speed",
         decel=1.5,
     ),
-    initial_speed=0,
+    #initial_speed=0,
     num_vehicles=14)
 
 
