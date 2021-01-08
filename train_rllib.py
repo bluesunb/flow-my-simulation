@@ -80,6 +80,7 @@ def setup_exps_rllib(flow_params,
         config = deepcopy(agent_cls._default_config)
         config["num_workers"] = n_cpus
         config["horizon"] = horizon
+        config["train_batch_size"] = horizon * n_rollouts
         
         if flags.exp_config== 'singleagent_ring':
             config["gamma"] = 0.99  # discount rate
@@ -90,6 +91,7 @@ def setup_exps_rllib(flow_params,
             config["sgd_minibatch_size"] = 1024
             config['lr']=5e-7
             config["clip_param"] = 0.2
+
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['sgd_minibatch_size']=64
@@ -109,6 +111,7 @@ def setup_exps_rllib(flow_params,
         agent_cls = get_agent_class(alg_run)
         config = deepcopy(agent_cls._default_config)
         config["num_workers"] = 1
+        config["train_batch_size"] = horizon * n_rollouts
         # model
         if flags.exp_config== 'singleagent_ring':
             config['n_step'] = 1
@@ -118,10 +121,10 @@ def setup_exps_rllib(flow_params,
             config['critic_hiddens'] = [64, 64]
             config['gamma'] = 0.99
             config['model']['fcnet_hiddens'] = [64, 64]
-            config['lr']=1e-4
+            config['lr']= 0.00001 #1e-4
             # exploration
-            config['exploration_config']['final_scale'] = 0.02
-            config['exploration_config']['scale_timesteps'] = 2100000
+            config['exploration_config']['final_scale'] = 0.05 #0.02
+            config['exploration_config']['scale_timesteps'] = 1500000 #2100000
             config['exploration_config']['ou_base_scale'] = 0.1
             config['exploration_config']['ou_theta'] = 0.15
             config['exploration_config']['ou_sigma'] = 0.2
@@ -134,9 +137,9 @@ def setup_exps_rllib(flow_params,
             #config['evaluation_interval'] = 5
             config['buffer_size'] = 300000 #3e5
             config['timesteps_per_iteration'] = 3000
-            config['prioritized_replay']=True
-            config["prioritized_replay_beta_annealing_timesteps"]=2200000
-            config['final_prioritized_replay_beta']=0.01
+            config['prioritized_replay']=False #True
+            #config["prioritized_replay_beta_annealing_timesteps"]=2200000
+            #config['final_prioritized_replay_beta']=0.01
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['n_step'] = 1
@@ -194,7 +197,51 @@ def setup_exps_rllib(flow_params,
             config['timesteps_per_iteration'] = 3000
             config['prioritized_replay']=False
 
-    
+    elif flags.algorithm.lower() == "td3":
+        from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG
+        alg_run = "TD3"
+        agent_cls = get_agent_class(alg_run)
+        config = deepcopy(agent_cls._default_config)
+        config["num_workers"] = n_cpus
+        #config["train_batch_size"] = horizon * n_rollouts
+        
+        # model
+        if flags.exp_config== 'singleagent_ring':
+            #TD3
+            config['twin_q'] = True
+            config['policy_delay'] = 2
+            config['smooth_target_policy'] = True
+            config['target_noise'] = 0.2
+            config['target_noise_clip'] = 0.5
+
+            config['n_step'] = 1
+            config['actor_hiddens'] = [64, 64]
+            config['actor_lr'] = 0.00001
+            config['critic_lr'] = 0.00002 #0.0001
+            config['critic_hiddens'] = [64, 64]
+            config['gamma'] = 0.99
+            config['lr']=0.00001
+            # exploration
+            config['exploration_config']['final_scale'] = 1.0
+            config['exploration_config']['scale_timesteps'] = 1
+            config['exploration_config']["initial_scale"] = 1.0
+            config['exploration_config']["random_timesteps"] = 10000
+            config['exploration_config']["stddev"] = 0.1
+            config['exploration_config']['type']='GaussianNoise'
+            # optimization
+            config['tau'] = 5e-3
+            config['l2_reg'] = 0.01 #0
+            config['train_batch_size'] = 128 #100
+            config['learning_starts'] = 10000
+            config['use_huber'] = False
+            # evaluation
+            #config['evaluation_interval'] = 5
+            config['buffer_size'] = 1000000
+            config['timesteps_per_iteration'] = 3000
+            config['prioritized_replay'] = False
+            config['worker_side_prioritization'] = False
+            config['use_state_preprocessor'] = False
+
     #common config
     config['framework']='torch'
     config['callbacks'] = {
@@ -258,6 +305,9 @@ def train_rllib(submodule, flags):
         flags.num_steps = 1500
         checkpoint_freq = 100
     elif alg_run=="DDPG":
+        flags.num_steps = 800
+        checkpoint_freq = 40	
+    elif alg_run=="TD3":
         flags.num_steps = 800
         checkpoint_freq = 40
     
