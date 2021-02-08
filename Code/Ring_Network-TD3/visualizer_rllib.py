@@ -199,8 +199,18 @@ def visualizer_rllib(args):
     final_inflows = []
     mean_speed = []
     std_speed = []
+    # Bmil Update
+    mean_headway = []
+    mean_tailway = []
+    max_headway = []
+
     for i in range(args.num_rollouts):
         vel = []
+        # Bmil Update
+        headway = []
+        maxway = []
+        tailway = []
+
         state = env.reset()
         if multiagent:
             ret = {key: [0] for key in rets.keys()}
@@ -209,10 +219,24 @@ def visualizer_rllib(args):
         for _ in range(env_params.horizon):
             vehicles = env.unwrapped.k.vehicle
             speeds = vehicles.get_speed(vehicles.get_ids())
+            # Bmil Update
+            rl_id = env.unwrapped.k.vehicle.get_rl_ids()[0]
+            lead_id = env.unwrapped.k.vehicle.get_leader(rl_id)
+            headways = env.unwrapped.k.vehicle.get_headway(lead_id)
+            tailways = env.unwrapped.k.vehicle.get_lane_tailways(rl_id)
+
 
             # only include non-empty speeds
             if speeds:
                 vel.append(np.mean(speeds))
+
+            # Bmil Update
+            if headways:
+                headway.append((np.mean(headways)))
+                maxway.append(np.max(headways))
+
+            if tailways:
+                tailway.append(np.mean(tailways))
 
             if multiagent:
                 action = {}
@@ -254,6 +278,11 @@ def visualizer_rllib(args):
             throughput_efficiency = [0] * len(final_inflows)
         mean_speed.append(np.mean(vel))
         std_speed.append(np.std(vel))
+        # Bmil Update
+        mean_headway.append(np.mean(headway))
+        mean_tailway.append(np.mean(tailway))
+        max_headway.append(np.max(maxway))
+
         if multiagent:
             for agent_id, rew in rets.items():
                 print('Round {}, Return: {} for agent {}'.format(
@@ -283,6 +312,13 @@ def visualizer_rllib(args):
     print(std_speed)
     print('Average, std: {}, {}'.format(np.mean(std_speed), np.std(
         std_speed)))
+    # Bmil Update
+    print("\nHeadway, mean (m):")
+    print(mean_headway)
+    print("max headway (m):")
+    print(max_headway)
+    print("\nTailway, mean (m):")
+    print(mean_tailway)
 
     # Compute arrival rate of vehicles in the last 500 sec of the run
     print("\nOutflows (veh/hr):")

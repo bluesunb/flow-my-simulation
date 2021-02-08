@@ -14,7 +14,7 @@ HORIZON = 3000
 # number of rollouts per training iteration
 N_ROLLOUTS = 20
 # number of parallel workers
-N_CPUS = 2
+N_CPUS = 8
 
 # We place one autonomous vehicle and 22 human-driven vehicles in the network
 vehicles = VehicleParams()
@@ -35,8 +35,11 @@ vehicles.add(
     num_vehicles=1)
 
 flow_params = dict(
+    # BMIL seed
+    seed=1009,
+
     # name of the experiment
-    exp_tag="singleagent_ring",
+    exp_tag="my_singleagent_ring",
 
     # name of the flow environment the experiment is running on
     env_name=WaveAttenuationPOEnv,
@@ -51,7 +54,8 @@ flow_params = dict(
     sim=SumoParams(
         sim_step=0.1,
         render=False,
-        restart_instance=False
+        restart_instance=False,
+        seed=1009, #BMIL seed
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)

@@ -77,40 +77,44 @@ def setup_exps_rllib(flow_params,
     config["num_workers"] = n_cpus
     # config["train_batch_size"] = horizon * n_rollouts
 
-    from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG
+    # model
+    from ray.rllib.agents.ddpg.td3 import TD3Trainer
+    config['n_step'] = 1
+    config['actor_hiddens'] = [64, 64]
+    config['actor_lr'] = 1e-7
+    config['critic_lr'] = 1e-6
+    config['critic_hiddens'] = [64, 64]
+    config['gamma'] = 0.99
+    config['lr'] = 1e-7
+    # TD3
     config['twin_q'] = True
     config['policy_delay'] = 2
     config['smooth_target_policy'] = True
-    config['target_noise'] = 0.2
+    config['target_noise'] = 0.2  #default 0.2
     config['target_noise_clip'] = 0.5
-
-    config['n_step'] = 1
-    config['actor_hiddens'] = [64, 64]
-    config['actor_lr'] = 0.00001
-    config['critic_lr'] = 0.00002  # 0.0001
-    config['critic_hiddens'] = [64, 64]
-    config['gamma'] = 0.99
-    config['lr'] = 0.00001
+    # Policy Optimizer
+    # config['optimizer'] = 'Adam'
     # exploration
-    config['exploration_config']['final_scale'] = 1.0
-    config['exploration_config']['scale_timesteps'] = 1
+    config['exploration_config']['final_scale'] = 0.05  # default 1
+    config['exploration_config']['scale_timesteps'] = 2000000  # 900000 # default 1
     config['exploration_config']["initial_scale"] = 1.0
-    config['exploration_config']["random_timesteps"] = 10000
+    config['exploration_config']["random_timesteps"] = 1000  # default 10000
     config['exploration_config']["stddev"] = 0.1
     config['exploration_config']['type'] = 'GaussianNoise'
     # optimization
-    config['tau'] = 5e-3
-    config['l2_reg'] = 0.01  # 0
-    config['train_batch_size'] = 128  # 100
-    config['learning_starts'] = 10000
+    config['tau'] = 0.001  # best; fix
+    config['l2_reg'] = 0 #1e-6
+    config['train_batch_size'] = 128  # default 100; best 128
+    config['learning_starts'] = 3000
     config['use_huber'] = False
+    config['target_network_update_freq'] = 3000
     # evaluation
     # config['evaluation_interval'] = 5
-    config['buffer_size'] = 1000000
+    config['buffer_size'] = 300000
     config['timesteps_per_iteration'] = 3000
-    config['prioritized_replay'] = False
+    config['prioritized_replay'] = True
     config['worker_side_prioritization'] = False
-    config['use_state_preprocessor'] = False
+    config['use_state_preprocessor'] = True
 
     # common config
     config['framework'] = 'torch'
@@ -169,14 +173,19 @@ def train_rllib(submodule, flags):
         flow_params, n_cpus, n_rollouts,
         policy_graphs, policy_mapping_fn, policies_to_train, flags)
 
-    ray.init(num_cpus=n_cpus + 1, object_store_memory=200 * 1024 * 1024)
+    @ray.remote(num_gpus=1)
+    def use_gpu():
+        print("ray.get_gpu_ids(): {}".format(ray.get_gpu_ids()))
+        print("CUDA_VISIBLE_DEVICES: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
+
+    ray.init(num_cpus=n_cpus + 1, num_gpus=1, object_store_memory=200 * 1024 * 1024)
     # checkpoint and num steps setting
     if alg_run == "PPO":
         flags.num_steps = 1500
         checkpoint_freq = 100
     elif alg_run == "TD3":
-        flags.num_steps = 600
-        checkpoint_freq = 30
+        flags.num_steps = 800
+        checkpoint_freq = 40
 
     exp_config = {
         "run": alg_run,
@@ -249,6 +258,11 @@ def train_rllib(submodule, flags):
     paramStr = params_data["env_config"]["flow_params"]
     # fix ring length option
     if flags.exp_config == "singleagent_ring":
+        paramStr = paramStr.replace("220", "260")
+        paramStr = paramStr.replace("270", "260")
+
+    # bmil edit; in order to fix visualization env
+    elif flags.exp_config == "my_singleagent_ring":
         paramStr = paramStr.replace("220", "260")
         paramStr = paramStr.replace("270", "260")
 
