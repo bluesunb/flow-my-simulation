@@ -39,6 +39,10 @@ We create a conda environment and installing Flow and its dependencies within th
     conda activate flow
     python setup.py develop
 ```
+For install flow within the environment
+```shell script
+pip install -e .
+```
 For Ubuntu 18.04: This command will install the SUMO for simulation.<br/>
 ```shell script
 bash scripts/setup_sumo_ubuntu1804.sh
@@ -98,13 +102,13 @@ git clone https://github.com/bmil-ssu/flow-autonomous-driving.git
 ## RL examples
 ### RLlib (for multiagent and single agent)
 
-for PPO(Proximal Policy Optimization) and DDPG(Deep Deterministic Policy Gradient) algorithm
+for PPO(Proximal Policy Optimization), DDPG(Deep Deterministic Policy Gradient), and TD3(Twin Delayed DDPG) algorithm
 ```shell script
-python train_rllib.py EXP_CONFIG --algorithm [DDPG or PPO]
+python train_rllib.py EXP_CONFIG --algorithm [DDPG or PPO or TD3]
 ```
 
 where `EXP_CONFIG` is the name of the experiment configuration file, as located in directory`exp_configs/rl/singleagent`.<br/>
-In '[DDPG or PPO]', You can choose 'DDPG' or 'PPO' Algorithm.(Default: PPO)
+In '[DDPG or PPO or TD3]', You can choose 'DDPG' or 'PPO or TD3' Algorithm.(Default: PPO)
 
 ### Visualizing Training Results
 If you want to visualizing after training by rllib(ray), 
@@ -173,7 +177,8 @@ After that, If you want to see those output file(XML), you could find in `~/flow
 
 ### 설치 및 코드 실행 방법 (한글설명)
 (안내하는 모든 명령어는 컴퓨터를 초기화후, Ubuntu 18.04 환경을 설치한 뒤 Terminal에서 실행한다.)
-* Anaconda3 설치방법
+
+#### Anaconda3 설치방법
 1. Anaconda3 설치 전 다음 명령어를 실행한다.
 ```
    sudo apt-get update
@@ -193,7 +198,7 @@ After that, If you want to see those output file(XML), you could find in `~/flow
 
 4. 가상환경을 활성화하기 위해 anaconda 설치가 완료되면 terminal을 종료 후 다시 연다. 
 
-* Flow, SUMO 설치방법
+#### FLOW, SUMO 설치방법
 1. Flow github repository를 다운로드한다. 
    ```
     conda
@@ -201,47 +206,50 @@ After that, If you want to see those output file(XML), you could find in `~/flow
     cd flow
     ```
 
-2. Anaconda를 이용해서 가상환경을 만들고 해당 환경 안에서 Flow 및 관련 파일을 설치한다. 
+2. Anaconda를 이용해서 가상환경을 만든다. 
     ```
-    conda update –n base –c defaults conda
+    conda update –n base –c defaluts conda
     conda env create –f environment.yml
     source ~/.bashrc
     conda activate flow
     python setup.py develop
     ```
-    
-3. Ubuntu 18.04에서 simulation을 위해서 SUMO를 설치한다. 
+3. 가상환경 내에 FLOW 관련 파일을 설치한다.
+   ```shell script
+   pip install -e .
+   ```
+4. Ubuntu 18.04에서 simulation을 위해서 SUMO를 설치한다. 
     ```
     bash scripts/setup_sumo_ubuntu1804.sh
     ```
     
-4. SUMO 설치를 확인한다. (SUMO가 설치된 경우, simulation 팝업 창이 열린다.)
+5. SUMO 설치를 확인한다. (SUMO가 설치된 경우, simulation 팝업 창이 열린다.)
     ```
     which sumo
     sumo --version
     sumo-gui
     ```
-5. FLOW 설치를 확인한다. 
+6. FLOW 설치를 확인한다. 
     ```
     conda activate flow
     python examples/simulate.py ring
     ```
 
-* Pytorch 설치
+#### Pytorch 설치
 Pytorch 1.6.0 이상의 version을 설치한다. 
 ```
    conda deactivate
    conda install pytorch torchvision cudatoolkit=10.2 -c pytorch
 ```
 
-* RLlib 설치 
-Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발생할 수 있다.)
-```
+#### RLlib 설치 
+1. Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발생할 수 있다.)
+    ```
     conda activate flow
     pip install –U ray==0.8.7
     pip install dm-tree
-```
-2. RLlib 설치를 확인한다. 
+    ```
+2. RLlib 설치를 확인한다.
     ```
     conda activate flow
     python examples/train.py singleagent_ring
@@ -259,7 +267,7 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
    pip install tensorboardx
    ```
    
-* Flow-autonomous-drivng repository 다운로드
+#### Flow-autonomous-drivng repository 다운로드
 1. 아래에서관련 파일을 다운로드한다.  
 ```
     cd 
@@ -267,7 +275,7 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
 ```
 
 
-* Training: DDPT +Ring 
+#### Training: DDPT +Ring 
 1. 원형 도로에서 DDPG 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다.
 ```
    cd flow-autonomous-driving
@@ -291,11 +299,11 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
   tensorboard --logdir singleagent_ring
 ```
 
-* High performance Example Code 
+#### High performance Example Code
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
 ```
     cd
-    cd flow-autonomous-driving/Code/Ring_Network-DDPG
+    cd flow-autonomous-driving/2020SUMMER/Code/Ring_Network-DDPG
     python visualizer_rllib.py ./results/DDPG_WaveAttenuationPOEnv-v0_0_2020-08-25_14-03-01r8h_t432 330
 ```
 
@@ -306,7 +314,7 @@ Ray 0.8.7 version을 설치한다.(해당 버전이 아닌 경우 오류가 발�
 
 
 
-Training: PPO+figure8 
+#### Training: PPO+figure8 
 1. 교차로 원형 혼합 도로 구조에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
 ```
   cd flow-autonomous-driving  
@@ -331,11 +339,11 @@ Training: PPO+figure8
 ```
 
 
-* High performance Example Code 
+#### High performance Example Code 
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
 ```
     cd
-    cd flow-autonomous-driving/Code/Figure_Eight_Network-PPO
+    cd flow-autonomous-driving/2020SUMMER/Code/Figure_Eight_Network-PPO
     python visualizer_rllib.py ./results/PPO_AccelEnv-v0_0_2020-09-04_13-47-12x8hecjmf 1500
 ```
 
@@ -346,7 +354,7 @@ Training: PPO+figure8
  
  
  
-* Training : PPO+ring
+#### Training : PPO+ring
 1. 원형 도로에서 PPO 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
 ```
    cd flow-autonomous-driving
@@ -369,11 +377,11 @@ Training: PPO+figure8
   tensorboard --logdir singleagent_ring
 ```
 
-* High performance Example Code 
+#### High performance Example Code 
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
 ```
    cd 
-   cd flow-autonomous-driving/Code/Ring_Network-PPO
+   cd flow-autonomous-driving/2020SUMMER/Code/Ring_Network-PPO
    python visualizer_rllib.py ./results/PPO_WaveAttenuationPOEnv-v0_0_2020-08-22_21-45-12bc33z2g0 1500
 ```   
 
@@ -381,9 +389,55 @@ Training: PPO+figure8
 ```
   tensorboard —logdir results
 ```
+
+#### Training : TD3+ring
+1. 원형 도로에서 TD3 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다. 
+```
+   cd flow-autonomous-driving
+   python train_rllib.py singleagent_ring --algorithm ddpg
+```   
+
+2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다.
+```
+   cd
+   cd flow-autonomous-driving
+   python visualizer_rllib.py ./ray_results/singleagent_ring/experiment_name/  number_of_checkpoints
+```   
+ -  experiment_name: Learning을 시작할 때, 생성된 폴더의 이름
+ - number_of_checkpoints: experiment_name 폴더 안에 생성된         checkpoint 폴더의 이름을 의미한다. visualizing을 하고자 하는    
+   checkpoint(숫자)를 입력한다. 
+3. Training이 끝난 후, 그래프를 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
+```
+  cd
+  cd ray_results
+  tensorboard --logdir singleagent_ring
+```
+
+#### High performance Example Visualizing Code 
+1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
+```
+   cd ~/flow-autonomous-driving
+   python visualizer_rllib.py ./Results/best_td3_ring/uniform_motion_TD3/TD3_WaveAttenuationPOEnv-v0_0_2021-02-04_17-40-56i6kxtghu 800
+```   
+
+2. High performance Example Code의 Training 결과를 tensorboard를 이용하여 확인하려면, terminal에 다음과 같은 명령어를 입력한다. 
+```
+  tensorboard —logdir results
+```
+
+#### High performance Example Regenerating Code
+1. High performance Example Code를 이용해 Agent를 학습시키고 싶다면 다음과 같은 명령어를 입력한다.  
+```
+   cd flow-autonomous-driving/Code/Ring_Network-TD3
+   python train_rllib.py my_singleagent_ring 
+```   
+
+
 ## Contributors
 _BMIL at Soongsil Univ._
 Prof. Kwon (Minhae Kwon), 
 Minsoo Kang, 
 Gihong Lee, 
-Hyeonju Lim
+Hyeonju Lim,
+Dongsu Lee,
+Sunwoong Kim.
