@@ -274,8 +274,28 @@ Pytorch 1.6.0 이상의 version을 설치한다.
     git clone https://github.com/bmil-ssu/flow-autonomous-driving.git
 ```
 
+#### DDPG-TD3 Neural network Output layer Activation func. 
+   만약 DDPG-TD3 알고리즘에서 actor network의 Output layer에 tanh를 적용하고 싶다면 다음을 따른다.
+   (2020 겨울학기 이후로 TD3와 DDPG의 연구 결과는 위와 같은 network 구조를 사용했다.)
+```
+   cd ~/flow-autonomous-driving/Additional_File
+   cp -f ddpg_torch_model.py ~/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/agents/ddpg/
+```
+   수정한 부분은 주석처리 하여 다음과 같이 표시했다.
+   만약 default 값을 사용하고 싶다면 SlimFC 내부 activation_fn을 None으로 바꾸어 입력하면 된다.
+```angular2html
+        #bmil edit for apply activation function - 'tanh' - to output layer in actor network
+        output_policy_fc = get_activation_fn("tanh", framework="torch")
+        self.policy_model.add_module(
+            "action_out",
+            SlimFC(
+                ins,
+                self.action_dim,
+                initializer=torch.nn.init.xavier_uniform_,
+                activation_fn=output_policy_fc)) #defalut: activation_fn=None
+```
 
-#### Training: DDPT +Ring 
+#### Training: DDPG +Ring 
 1. 원형 도로에서 DDPG 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다.
 ```
    cd flow-autonomous-driving
