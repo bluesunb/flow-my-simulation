@@ -31,6 +31,10 @@ from flow.utils.registry import make_create_env
 from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
+import matplotlib
+from matplotlib import pyplot as plt
+from collections import defaultdict
+from flow.core.rewards import veh_energy_consumption
 
 
 EXAMPLE_USAGE = """
@@ -199,17 +203,17 @@ def visualizer_rllib(args):
     final_inflows = []
     mean_speed = []
     std_speed = []
-    # Bmil Update
-    mean_headway = []
-    mean_tailway = []
-    max_headway = []
+    #bmil edit
+    acc_rollout = []
+    power = 0
 
     for i in range(args.num_rollouts):
         vel = []
-        # Bmil Update
-        headway = []
-        maxway = []
-        tailway = []
+
+        # bmil list for collecting data
+        timerange = []
+        vel_dict = defaultdict(list)
+        rl_acc = []
 
         state = env.reset()
         if multiagent:
@@ -218,25 +222,35 @@ def visualizer_rllib(args):
             ret = 0
         for _ in range(env_params.horizon):
             vehicles = env.unwrapped.k.vehicle
-            speeds = vehicles.get_speed(vehicles.get_ids())
-            # Bmil Update
-            rl_id = env.unwrapped.k.vehicle.get_rl_ids()[0]
-            lead_id = env.unwrapped.k.vehicle.get_leader(rl_id)
-            headways = env.unwrapped.k.vehicle.get_headway(lead_id)
-            tailways = env.unwrapped.k.vehicle.get_lane_tailways(rl_id)
+            # speeds = vehicles.get_speed(vehicles.get_ids())
+            ids = vehicles.get_ids()
+            speeds = vehicles.get_speed(ids)
 
+            # BMIL EDIT FOR COLLECTING DATA OF ACCELERATION AND VELOCITY
+            rl = vehicles.get_rl_ids()[0]
+            act = vehicles.get_realized_accel(rl)
+            rl_acc.append(act or 0)
+            timerange.append(vehicles.get_timestep(ids[-1]) / 100000)
 
             # only include non-empty speeds
             if speeds:
                 vel.append(np.mean(speeds))
+                # bmil edit
+                for veh_id, speed in zip(ids, speeds):
+                    vel_dict[veh_id].append(speed)
+                if vehicles.get_timestep(ids[0]) >= 100000:
+                    M = 1200  # mass of average sized vehicle (kg)
+                    g = 9.81  # gravitational acceleration (m/s^2)
+                    Cr = 0.005  # rolling resistance coefficient
+                    Ca = 0.3  # aerodynamic drag coefficient
+                    rho = 1.225  # air density (kg/m^3)
+                    A = 2.6  # vehicle cross sectional area (m^2)
+                    speed = vehicles.get_speed(veh_id)
+                    prev_speed = vehicles.get_previous_speed(veh_id)
 
-            # Bmil Update
-            if headways:
-                headway.append((np.mean(headways)))
-                maxway.append(np.max(headways))
+                    accel = abs(speed - prev_speed) / env.sim_step
 
-            if tailways:
-                tailway.append(np.mean(tailways))
+                    power += M * speed * accel + M * g * Cr * speed + 0.5 * rho * A * Ca * speed ** 3
 
             if multiagent:
                 action = {}
@@ -251,6 +265,11 @@ def visualizer_rllib(args):
                             state[agent_id], policy_id=policy_map_fn(agent_id))
             else:
                 action = agent.compute_action(state)
+                #  BMIL EDIT FOR COLLECTING DATA FROM 100000 TO 375000
+                #  Because 0 - 75000 steps are warm up and 75000 - 100000 steps are process of stabilizing
+                if vehicles.get_timestep(rl) >= 100000:
+                    acc_rollout.append(act)
+
             state, reward, done, _ = env.step(action)
             if multiagent:
                 for actor, rew in reward.items():
@@ -278,17 +297,45 @@ def visualizer_rllib(args):
             throughput_efficiency = [0] * len(final_inflows)
         mean_speed.append(np.mean(vel))
         std_speed.append(np.std(vel))
-        # Bmil Update
-        mean_headway.append(np.mean(headway))
-        mean_tailway.append(np.mean(tailway))
-        max_headway.append(np.max(maxway))
-
         if multiagent:
             for agent_id, rew in rets.items():
                 print('Round {}, Return: {} for agent {}'.format(
                     i, ret, agent_id))
         else:
             print('Round {}, Return: {}'.format(i, ret))
+
+        # BMIL EDIT FOR PLOT DATA
+        veh = list(vel_dict.keys())
+        plt.subplot(3, 1, 1)
+        plt.title('Results')
+        for v in veh[:-1]:
+            plt.plot(timerange, vel_dict[v])
+        plt.xlabel('timestep(s)')
+        plt.ylabel('speed(m/s)')
+        plt.legend(veh[:-1], fontsize=9)
+        plt.grid(True)
+        # plt.show()
+
+        plt.subplot(3, 1, 2)
+        plt.plot(timerange, vel_dict[veh[-1]], color='r')
+        plt.xlabel('timestep(s)')
+        plt.ylabel('speed(m/s)')
+        plt.legend(['lc'] + veh[-1:])
+        plt.grid(True)
+
+        plt.subplot(3, 1, 3)
+        plt.plot(timerange, rl_acc, color = 'b')
+        plt.xlabel('timestep(s)')
+        plt.ylabel('acceleration(m/s^2)')
+        plt.grid(True)
+        # BASE_DIR = '/home/bmil/BMIL_FLOW_CODE/Graph/'
+        # plt.savefig(f'{BASE_DIR}{"__".join(name)}', dpi=400)
+        plt.show()
+
+    # BMIL EDIT FOR COMPUTING ACCELERATION's MEAN AND VAR
+    acc_rollout1 = [accarr for accarr in acc_rollout]
+    mean_acc_rollout = [np.mean(acc_rollout1)]
+    variance_acc_rollout = [np.var(acc_rollout1)]
 
     print('==== Summary of results ====')
     print("Return:")
@@ -312,13 +359,14 @@ def visualizer_rllib(args):
     print(std_speed)
     print('Average, std: {}, {}'.format(np.mean(std_speed), np.std(
         std_speed)))
-    # Bmil Update
-    print("\nHeadway, mean (m):")
-    print(mean_headway)
-    print("max headway (m):")
-    print(max_headway)
-    print("\nTailway, mean (m):")
-    print(mean_tailway)
+
+    # BMIL Edit FOR PRINT ACCEL's MEAN AND VAR
+    print("\nAccel, mean (m/s^2):")
+    print(mean_acc_rollout)
+    print("\nAccel, var (m/s^2):")
+    print(variance_acc_rollout)
+    print("\nTotal Power Consumption (kgᐧm^2/s^3):")
+    print(power)
 
     # Compute arrival rate of vehicles in the last 500 sec of the run
     print("\nOutflows (veh/hr):")
