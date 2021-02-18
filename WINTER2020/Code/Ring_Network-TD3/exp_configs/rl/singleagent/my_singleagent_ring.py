@@ -36,7 +36,7 @@ vehicles.add(
 
 flow_params = dict(
     # BMIL seed
-    seed=1009,
+    seed=1002,
 
     # name of the experiment
     exp_tag="my_singleagent_ring",
@@ -55,7 +55,7 @@ flow_params = dict(
         sim_step=0.1,
         render=False,
         restart_instance=False,
-        seed=1009, #BMIL seed
+        seed=1002, #BMIL seed
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
