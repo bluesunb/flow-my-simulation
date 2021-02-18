@@ -5,17 +5,16 @@ vehicles in a variable length ring road.
 """
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
 from flow.core.params import VehicleParams, SumoCarFollowingParams
-from flow.controllers import RLController, IDMController, ContinuousRouter, SimLaneChangeController
-from flow.envs import WaveAttenuationPOEnv, LaneChangeAccelPOEnv
+from flow.controllers import RLController, IDMController, ContinuousRouter
+from flow.envs import WaveAttenuationPOEnv
 from flow.networks import RingNetwork
-from flow.core.params import SumoLaneChangeParams
 
 # time horizon of a single rollout
 HORIZON = 3000
 # number of rollouts per training iteration
 N_ROLLOUTS = 20
 # number of parallel workers
-N_CPUS = 2
+N_CPUS = 6
 
 # We place one autonomous vehicle and 22 human-driven vehicles in the network
 vehicles = VehicleParams()
@@ -27,24 +26,22 @@ vehicles.add(
     car_following_params=SumoCarFollowingParams(
         min_gap=0
     ),
-    #lane_change_params=SumoLaneChangeParams(
-    #    lane_change_mode=1621, ),
     routing_controller=(ContinuousRouter, {}),
     num_vehicles=21)
 vehicles.add(
     veh_id="rl",
     acceleration_controller=(RLController, {}),
     routing_controller=(ContinuousRouter, {}),
-    #lane_change_params=SumoLaneChangeParams(
-    #    lane_change_mode=1621,),
     num_vehicles=1)
 
 flow_params = dict(
+    # BMIL seed
+    seed=1001,
     # name of the experiment
     exp_tag="singleagent_ring",
 
     # name of the flow environment the experiment is running on
-    env_name=LaneChangeAccelPOEnv, #WaveAttenuationPOEnv
+    env_name=WaveAttenuationPOEnv,
 
     # name of the network class the experiment is running on
     network=RingNetwork,
@@ -56,21 +53,19 @@ flow_params = dict(
     sim=SumoParams(
         sim_step=0.1,
         render=False,
-        restart_instance=False
+        restart_instance=False,
+        seed=1001, #BMIL Seed
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
-        warmup_steps=10000,
+        warmup_steps=750,
         clip_actions=False,
         additional_params={
             "max_accel": 1,
             "max_decel": 1,
             "ring_length": [220, 270],
-            "lane_change_duration": 30,
-            "target_velocity": 10,
-            'sort_vehicles': False
         },
         evaluate=True,
     ),

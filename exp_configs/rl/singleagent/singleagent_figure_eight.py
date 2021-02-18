@@ -9,9 +9,9 @@ from flow.networks.figure_eight import FigureEightNetwork
 # time horizon of a single rollout
 HORIZON = 3000
 # number of rollouts per training iteration
-N_ROLLOUTS = 100
+N_ROLLOUTS = 20
 # number of parallel workers
-N_CPUS = 2
+N_CPUS = 7
 
 # We place one autonomous vehicle and 13 human-driven vehicles in the network
 vehicles = VehicleParams()
@@ -37,8 +37,10 @@ vehicles.add(
     num_vehicles=1)
 
 flow_params = dict(
+    seed=1004,
+
     # name of the experiment
-    exp_tag='singleagent_figure_eight',
+    exp_tag='my_singleagent_figure_eight',
 
     # name of the flow environment the experiment is running on
     env_name=AccelEnv,
@@ -53,18 +55,20 @@ flow_params = dict(
     sim=SumoParams(
         sim_step=0.1,
         render=False,
+        seed=1004
     ),
 
     # environment related parameters (see flow.core.params.EnvParams)
     env=EnvParams(
         horizon=HORIZON,
+        # warmup_steps=200,
         additional_params={
             'target_velocity': 10,
             'max_accel': 3,
             'max_decel': 3,
             'sort_vehicles': False
         },
-        evaluate=True,
+        evaluate=False,
     ),
 
     # network-related parameters (see flow.core.params.NetParams and the

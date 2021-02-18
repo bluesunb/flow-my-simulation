@@ -79,52 +79,88 @@ def setup_exps_rllib(flow_params,
         agent_cls = get_agent_class(alg_run)
         config = deepcopy(agent_cls._default_config)
         config["num_workers"] = n_cpus
+        #config['num_gpus'] = 0.25
         config["horizon"] = horizon
-        config["train_batch_size"] = horizon * n_rollouts
+        #config["train_batch_size"] = horizon * n_rollouts
         
         if flags.exp_config== 'singleagent_ring':
             config["gamma"] = 0.99  # discount rate
             config["use_gae"] = True  # truncated
-            config["lambda"] = 0.97  # truncated value
+            config["lambda"] = 0.99  # truncated value
             config["kl_target"] = 0.02  # d_target
             config["num_sgd_iter"] = 15
             config["sgd_minibatch_size"] = 1024
-            config['lr']=5e-7
+            config['lr'] = 5e-7
             config["clip_param"] = 0.2
+            config["rollout_fragment_length"] = 3000
+            config['train_batch_size'] = 3000
 
 
         elif flags.exp_config=='singleagent_figure_eight':
-            config['sgd_minibatch_size']=64
+            config["gamma"] = 0.99  # discount rate
+            config["use_gae"] = True  # truncated
+            config["lambda"] = 1.0  # truncated value 0.97
+            config["kl_target"] = 0.01  # d_target 0.02
+            config["num_sgd_iter"] = 30
+            config['sgd_minibatch_size'] = 64
             config["clip_param"] = 0.2
+            config['lr'] = 1e-05
+            config['train_batch_size'] = 512
+
+            #deep network
+            config['model']['fcnet_hiddens'] = [64, 64]
+
             #Exploration
             config['exploration_config']["type"] = "GaussianNoise"
             config['exploration_config']["initial_scale"] = 1.0
-            config['exploration_config']["final_scale"] = 0.02
+            config['exploration_config']["final_scale"] = 0.05
             config['exploration_config']["scale_timesteps"] = 1000000
             config['exploration_config']["random_timesteps"] = 1000
             config['exploration_config']["stddev"] = 0.1
-        
+
+        elif flags.exp_config=='singleagent_merge':
+            config["gamma"] = 0.99  # discount rate
+            config["use_gae"] = True  # truncated
+            config["lambda"] = 0.97  # truncated value 0.97
+            config["kl_target"] = 0.02  # d_target 0.02
+            config["num_sgd_iter"] = 30
+            config["sgd_minibatch_size"] = 64
+            config['lr'] = 1e-7
+            config["clip_param"] = 0.2
+            config["train_batch_size"] = 256
+
+            # deep network
+            config['model']['fcnet_hiddens'] = [64, 64]
+
+            # Exploration
+            config['exploration_config']["type"] = "GaussianNoise"
+            config['exploration_config']["initial_scale"] = 1.0
+            config['exploration_config']["final_scale"] = 0.05
+            config['exploration_config']["scale_timesteps"] = 3000000
+            config['exploration_config']["random_timesteps"] = 1000
+            config['exploration_config']["stddev"] = 0.1
 
     elif flags.algorithm.lower() == "ddpg":
         from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG
         alg_run = "DDPG"
         agent_cls = get_agent_class(alg_run)
         config = deepcopy(agent_cls._default_config)
-        config["num_workers"] = 1
-        config["train_batch_size"] = horizon * n_rollouts
+        config["num_workers"] = n_cpus
+        #config["train_batch_size"] = horizon * n_rollouts
         # model
-        if flags.exp_config== 'singleagent_ring':
+        if flags.exp_config == 'singleagent_ring':
             config['n_step'] = 1
             config['actor_hiddens'] = [64, 64]
             config['actor_lr'] = 0.0001  # in article 'ddpg'
             config['critic_lr'] = 0.0001
             config['critic_hiddens'] = [64, 64]
             config['gamma'] = 0.99
-            config['model']['fcnet_hiddens'] = [64, 64]
-            config['lr']= 0.00001 #1e-4
+            del config['model']['fcnet_hiddens']
+            del config['model']['fcnet_activation']
+            config['lr'] = 0.0001
             # exploration
-            config['exploration_config']['final_scale'] = 0.05 #0.02
-            config['exploration_config']['scale_timesteps'] = 1500000 #2100000
+            config['exploration_config']['final_scale'] = 0.05
+            config['exploration_config']['scale_timesteps'] = 900000
             config['exploration_config']['ou_base_scale'] = 0.1
             config['exploration_config']['ou_theta'] = 0.15
             config['exploration_config']['ou_sigma'] = 0.2
@@ -134,22 +170,22 @@ def setup_exps_rllib(flow_params,
             config['train_batch_size'] = 64
             config['learning_starts'] = 3000
             # evaluation
-            #config['evaluation_interval'] = 5
-            config['buffer_size'] = 300000 #3e5
+            # config['evaluation_interval'] = 5
+            config['buffer_size'] = 300000  # 3e5
             config['timesteps_per_iteration'] = 3000
-            config['prioritized_replay']=False #True
+            config['prioritized_replay'] = False
             #config["prioritized_replay_beta_annealing_timesteps"]=2200000
             #config['final_prioritized_replay_beta']=0.01
 
         elif flags.exp_config=='singleagent_figure_eight':
             config['n_step'] = 1
-            config['actor_hiddens'] = [400, 300]
+            config['actor_hiddens'] = [64, 64]
             config['actor_lr'] = 0.00001  # in article 'ddpg'
             config['critic_lr'] = 0.0001
-            config['critic_hiddens'] = [400, 300]
+            config['critic_hiddens'] = [64, 64]
             config['gamma'] = 0.99
-            config['model']['fcnet_hiddens'] = [256, 256]
-            config['lr']=1e-5
+            # config['model']['fcnet_hiddens'] = [256, 256]
+            config['lr'] = 1e-5
             #exploration
             config['exploration_config']['final_scale'] = 0.02
             config['exploration_config']['scale_timesteps'] = 1500000
@@ -159,46 +195,47 @@ def setup_exps_rllib(flow_params,
             del config['exploration_config']['ou_base_scale']
             del config['exploration_config']['ou_theta']
             del config['exploration_config']['ou_sigma']
-            config['exploration_config']['type']='GaussianNoise'
+            config['exploration_config']['type'] = 'GaussianNoise'
             # optimization
-            config['tau'] = 0.002
+            config['tau'] = 0.001
             config['l2_reg'] = 1e-6
             config['train_batch_size'] = 256
-            config['learning_starts'] = 0
+            config['learning_starts'] = 3000
+            config['target_network_update_freq'] = 100000
             # evaluation
             config['timesteps_per_iteration'] = 3000
             #config['evaluation_interval'] = 5
-            config['buffer_size'] = 300000 #3e5
-            config["prioritized_replay_beta_annealing_timesteps"]=200000
-            config['prioritized_replay']=True
+            config['buffer_size'] = 300000
+            config["prioritized_replay_beta_annealing_timesteps"] = 100000
+            config['prioritized_replay'] = True
         else:# merge
             config['n_step'] = 1
-            config['actor_hiddens'] = [64, 64]
-            config['actor_lr'] = 0.0001  # in article 'ddpg'
+            config['actor_hiddens'] = [32, 32]
+            config['actor_lr'] = 0.00001  # in article 'ddpg'
             config['critic_lr'] = 0.0001
-            config['critic_hiddens'] = [64, 64]
+            config['critic_hiddens'] = [32, 32]
             config['gamma'] = 0.99
-            config['model']['fcnet_hiddens'] = [64, 64]
-            config['lr']=1e-5
+            config['lr'] = 1e-5
             # exploration
-            config['exploration_config']['final_scale'] = 0.05
-            config['exploration_config']['scale_timesteps'] = 1500000
+            config['exploration_config']['final_scale'] = 0.02
+            config['exploration_config']['scale_timesteps'] = 2100000
             config['exploration_config']['ou_base_scale'] = 0.1
             config['exploration_config']['ou_theta'] = 0.15
             config['exploration_config']['ou_sigma'] = 0.2
             # optimization
-            config['tau'] = 0.002
+            config['tau'] = 0.001
             config['l2_reg'] = 1e-6
-            config['train_batch_size'] = 64
+            config['train_batch_size'] = 128
             config['learning_starts'] = 3000
+            config['target_network_update_freq'] = 3000
             # evaluation
             #config['evaluation_interval'] = 5
             config['buffer_size'] = 300000 #3e5
             config['timesteps_per_iteration'] = 3000
-            config['prioritized_replay']=False
+            config['prioritized_replay'] = False
 
     elif flags.algorithm.lower() == "td3":
-        from ray.rllib.agents.ddpg.ddpg import DEFAULT_CONFIG
+        from ray.rllib.agents.ddpg.td3 import TD3Trainer
         alg_run = "TD3"
         agent_cls = get_agent_class(alg_run)
         config = deepcopy(agent_cls._default_config)
@@ -207,40 +244,119 @@ def setup_exps_rllib(flow_params,
         
         # model
         if flags.exp_config== 'singleagent_ring':
-            #TD3
-            config['twin_q'] = True
-            config['policy_delay'] = 2
-            config['smooth_target_policy'] = True
-            config['target_noise'] = 0.2
-            config['target_noise_clip'] = 0.5
 
             config['n_step'] = 1
             config['actor_hiddens'] = [64, 64]
             config['actor_lr'] = 0.00001
-            config['critic_lr'] = 0.00002 #0.0001
+            config['critic_lr'] = 0.0001
             config['critic_hiddens'] = [64, 64]
             config['gamma'] = 0.99
-            config['lr']=0.00001
+            config['lr'] = 0.00001
+            # TD3
+            config['twin_q'] = True
+            config['policy_delay'] = 2
+            config['smooth_target_policy'] = True
+            config['target_noise'] = 0.1  # default 0.2
+            config['target_noise_clip'] = 0.5
+            # Policy Optimizer
+            # config['optimizer'] = 'Adam'
             # exploration
-            config['exploration_config']['final_scale'] = 1.0
-            config['exploration_config']['scale_timesteps'] = 1
+            config['exploration_config']['final_scale'] = 0.05  # default 1
+            config['exploration_config']['scale_timesteps'] = 1500000  # 900000 # default 1
             config['exploration_config']["initial_scale"] = 1.0
-            config['exploration_config']["random_timesteps"] = 10000
+            config['exploration_config']["random_timesteps"] = 1000  # default 10000
             config['exploration_config']["stddev"] = 0.1
-            config['exploration_config']['type']='GaussianNoise'
+            config['exploration_config']['type'] = 'GaussianNoise'
             # optimization
-            config['tau'] = 5e-3
-            config['l2_reg'] = 0.01 #0
-            config['train_batch_size'] = 128 #100
+            config['tau'] = 0.001  # best; fix
+            config['l2_reg'] = 0
+            config['train_batch_size'] = 128  # default 100; best 128
             config['learning_starts'] = 10000
             config['use_huber'] = False
             # evaluation
-            #config['evaluation_interval'] = 5
-            config['buffer_size'] = 1000000
+            # config['evaluation_interval'] = 5
+            config['buffer_size'] = 300000  # default 1000000
             config['timesteps_per_iteration'] = 3000
             config['prioritized_replay'] = False
             config['worker_side_prioritization'] = False
             config['use_state_preprocessor'] = False
+
+        elif flags.exp_config == 'singleagent_figure_eight':
+            # TD3
+            config['twin_q'] = True
+            config['policy_delay'] = 2
+            config['smooth_target_policy'] = True
+            config['target_noise'] = 0.2  # default 0.2
+            config['target_noise_clip'] = 0.5
+            # model
+            config['n_step'] = 1
+            config['actor_hiddens'] = [256, 256]
+            config['actor_lr'] = 0.000001
+            config['critic_lr'] = 0.00001
+            config['critic_hiddens'] = [256, 256]
+            config['gamma'] = 0.99
+            config['lr'] = 0.000001
+            # config['model']['fcnet_hiddens'] = [64, 64]
+            # exploration
+            config['exploration_config']['type'] = 'GaussianNoise'
+            config['exploration_config']['final_scale'] = 0.05  # default 1
+            config['exploration_config']['scale_timesteps'] = 9000000  # 900000 # default 1
+            config['exploration_config']["initial_scale"] = 1
+            config['exploration_config']["random_timesteps"] = 1000  # default 10000
+            config['exploration_config']["stddev"] = 0.1
+            # optimization
+            config['tau'] = 0.001  # best; fix
+            config['l2_reg'] = 1e-6
+            config['train_batch_size'] = 128  # default 100; best 128
+            config['learning_starts'] = 10000
+            config['use_huber'] = False
+            config['target_network_update_freq'] = 50000
+            # evaluation
+            # config['evaluation_interval'] = 5
+            config['buffer_size'] = 300000  # default 1000000
+            config['timesteps_per_iteration'] = 3000
+            config['prioritized_replay'] = False
+            config['worker_side_prioritization'] = False
+            config['use_state_preprocessor'] = False
+        elif flags.exp_config == 'singleagent_merge':
+            # TD3
+            config['twin_q'] = True
+            config['policy_delay'] = 2
+            config['smooth_target_policy'] = True
+            config['target_noise'] = 0.2  # default 0.2
+            config['target_noise_clip'] = 0.5
+            # model
+            config['n_step'] = 1
+            config['actor_hiddens'] = [64, 64]
+            config['actor_lr'] = 0.000001
+            config['critic_lr'] = 0.00001
+            config['critic_hiddens'] = [64, 64]
+            config['gamma'] = 0.99
+            config['lr'] = 0.000001
+            # config['model']['fcnet_hiddens'] = [64, 64]
+            # exploration
+            config['exploration_config']['type'] = 'GaussianNoise'
+            config['exploration_config']['final_scale'] = 0.05  # default 1
+            config['exploration_config']['scale_timesteps'] = 10000000  # 900000 # default 1
+            config['exploration_config']["initial_scale"] = 1
+            config['exploration_config']["random_timesteps"] = 1000  # default 10000
+            config['exploration_config']["stddev"] = 0.1
+            # optimization
+            config['tau'] = 0.001  # best; fix
+            config['l2_reg'] = 1e-6
+            config['train_batch_size'] = 128  # default 100; best 128
+            config['learning_starts'] = 10000
+            config['use_huber'] = False
+            config['target_network_update_freq'] = 1
+            # evaluation
+            # config['evaluation_interval'] = 5
+            config['buffer_size'] = 300000  # default 1000000
+            config['timesteps_per_iteration'] = 5000
+            config['prioritized_replay'] = False
+            config['worker_side_prioritization'] = False
+            config['use_state_preprocessor'] = False
+
+
 
     #common config
     config['framework']='torch'
@@ -299,18 +415,23 @@ def train_rllib(submodule, flags):
         flow_params, n_cpus, n_rollouts,
         policy_graphs, policy_mapping_fn, policies_to_train, flags)
 
+    # @ray.remote(num_gpus=1)
+    # def use_gpu():
+    #     print("ray.get_gpu_ids(): {}".format(ray.get_gpu_ids()))
+    #     print("CUDA_VISIBLE_DEVICES: {}".format(os.environ["CUDA_VISIBLE_DEVICES"]))
+
     ray.init(num_cpus=n_cpus + 1, object_store_memory=200 * 1024 * 1024)
     # checkpoint and num steps setting
     if alg_run=="PPO":
-        flags.num_steps = 1500
-        checkpoint_freq = 100
+        flags.num_steps = 1000
+        checkpoint_freq = 50
     elif alg_run=="DDPG":
-        flags.num_steps = 800
-        checkpoint_freq = 40	
+        flags.num_steps = 600
+        checkpoint_freq = 50
     elif alg_run=="TD3":
-        flags.num_steps = 800
-        checkpoint_freq = 40
-    
+        flags.num_steps = 2000
+        checkpoint_freq = 100
+
     exp_config = {
         "run": alg_run,
         "env": gym_name,

@@ -7,11 +7,6 @@
 - ray-project(rllib) : https://github.com/ray-project/ray (need at least 0.8.6 is needed)
 - pytorch : https://pytorch.org/
 
-### Documentation for Flow
--English Ver: [DocumentPDF]https://drive.google.com/file/d/1NQRoCFgfIh34IJh4p0GqqOWagZh543X2/view?usp=sharing
-
--Korean Ver: [DocumentPDF]https://drive.google.com/file/d/1BUStOlq8LRypEmwXfRLD-_Xd04wnmCwL/view?usp=sharing
-
 ### How to Download Requirement
 #### Anaconda(Python3) installation:
 - Prerequisites
@@ -283,7 +278,7 @@ Pytorch 1.6.0 이상의 version을 설치한다.
 ```
    수정한 부분은 주석처리 하여 다음과 같이 표시했다.
    만약 default 값을 사용하고 싶다면 SlimFC 내부 activation_fn을 None으로 바꾸어 입력하면 된다.
-```angular2html
+```shell script
         #bmil edit for apply activation function - 'tanh' - to output layer in actor network
         output_policy_fc = get_activation_fn("tanh", framework="torch")
         self.policy_model.add_module(
@@ -451,6 +446,11 @@ Pytorch 1.6.0 이상의 version을 설치한다.
    cd flow-autonomous-driving/Code/Ring_Network-TD3
    python train_rllib.py my_singleagent_ring 
 ```   
+
+### Encrypted 2020 SUMMER Documentation for Flow 
+-English Ver: [DocumentPDF]https://drive.google.com/file/d/1NQRoCFgfIh34IJh4p0GqqOWagZh543X2/view?usp=sharing
+
+-Korean Ver: [DocumentPDF]https://drive.google.com/file/d/1BUStOlq8LRypEmwXfRLD-_Xd04wnmCwL/view?usp=sharing
 
 
 ## Contributors

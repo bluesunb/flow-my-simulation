@@ -18,11 +18,11 @@ from flow.networks import MergeNetwork
 EXP_NUM = 0
 
 # time horizon of a single rollout
-HORIZON = 600
+HORIZON = 5000
 # number of rollouts per training iteration
 N_ROLLOUTS = 20
 # number of parallel workers
-N_CPUS = 2
+N_CPUS = 5
 
 # inflow rate at the highway
 FLOW_RATE = 2000
@@ -81,7 +81,7 @@ inflow.add(
 
 flow_params = dict(
     # name of the experiment
-    exp_tag="stabilizing_open_network_merges",
+    exp_tag="singleagent_merge",
 
     # name of the flow environment the experiment is running on
     env_name=MergePOEnv,
@@ -94,7 +94,7 @@ flow_params = dict(
 
     # sumo-related parameters (see flow.core.params.SumoParams)
     sim=SumoParams(
-        sim_step=0.2,
+        sim_step=0.1,
         render=False,
         restart_instance=True,
     ),
