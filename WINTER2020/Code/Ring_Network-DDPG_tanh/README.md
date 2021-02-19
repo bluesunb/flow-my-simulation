@@ -146,7 +146,7 @@ If you want to visualizing after training by rllib(ray),
 It means the name of the checkpoint folder created in the experiment_name folder. Enter the checkpoint (number) you want to visualize.
 
 ### Results for training Ring Network
-#### DDPG (Deep Deterministic Policy Gradient) is applied tanh activation func on output layer 
+#### DDPG (Deep Deterministic Policy Gradient) with tanh activation func on output layer of actor network
 -Ring Network (ring length 220-270 fir training)<br/>
 ![Ring_DDPG_tanh_Tensorboard](https://user-images.githubusercontent.com/62413318/108444396-e73e8c00-729d-11eb-807a-f402a4cf4d13.png)<br/>
 Mean velocity in 22 Non-AVs system: 4.22m/s (ring length: 260)<br/>
@@ -312,4 +312,6 @@ Pytorch 1.6.0 이상의 version을 설치한다.
 
 ## Contributors
 _BMIL at Soongsil Univ._
-Prof. Kwon (Minhae Kwon), 
+Prof. Kwon (Minhae Kwon),
+Dongsu Lee
+Sun Woong Kim
