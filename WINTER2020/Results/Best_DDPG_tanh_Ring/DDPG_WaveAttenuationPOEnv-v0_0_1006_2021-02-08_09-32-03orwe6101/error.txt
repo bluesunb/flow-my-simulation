@@ -1,0 +1,75 @@
+Failure # 1 (occurred at 2021-02-08_09-46-02)
+Traceback (most recent call last):
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/tune/trial_runner.py", line 471, in _process_trial
+    result = self.trial_executor.fetch_result(trial)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/tune/ray_trial_executor.py", line 430, in fetch_result
+    result = ray.get(trial_future[0], DEFAULT_GET_TIMEOUT)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/worker.py", line 1538, in get
+    raise value.as_instanceof_cause()
+ray.exceptions.RayTaskError(FatalFlowError): [36mray::DDPG.train()[39m (pid=18917, ip=220.149.82.43)
+  File "python/ray/_raylet.pyx", line 479, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/agents/trainer.py", line 519, in train
+    raise e
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/agents/trainer.py", line 508, in train
+    result = Trainable.train(self)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/tune/trainable.py", line 332, in train
+    result = self.step()
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/agents/trainer_template.py", line 110, in step
+    res = next(self.train_exec_impl)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 758, in __next__
+    return next(self.built_iterator)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 785, in apply_foreach
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 845, in apply_filter
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 845, in apply_filter
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 785, in apply_foreach
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 845, in apply_filter
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 1078, in build_union
+    item = next(it)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 758, in __next__
+    return next(self.built_iterator)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 785, in apply_foreach
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 785, in apply_foreach
+    for item in it:
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 785, in apply_foreach
+    for item in it:
+  [Previous line repeated 1 more time]
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 472, in base_iterator
+    yield ray.get(futures, timeout=timeout)
+ray.exceptions.RayTaskError(FatalFlowError): [36mray::RolloutWorker.par_iter_next()[39m (pid=18918, ip=220.149.82.43)
+  File "python/ray/_raylet.pyx", line 479, in ray._raylet.execute_task
+  File "python/ray/_raylet.pyx", line 432, in ray._raylet.execute_task.function_executor
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/util/iter.py", line 1156, in par_iter_next
+    return next(self.local_it)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/rollout_worker.py", line 281, in gen_rollouts
+    yield self.sample()
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/rollout_worker.py", line 563, in sample
+    batches = [self.input_reader.next()]
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/sampler.py", line 71, in next
+    batches = [self.get_data()]
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/sampler.py", line 181, in get_data
+    item = next(self.rollout_provider)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/sampler.py", line 536, in _env_runner
+    _use_trajectory_view_api=_use_trajectory_view_api)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/evaluation/sampler.py", line 805, in _process_observations
+    env_id)
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/env/base_env.py", line 350, in try_reset
+    return {_DUMMY_AGENT_ID: self.vector_env.reset_at(env_id)}
+  File "/home/bmil/anaconda3/envs/flow/lib/python3.7/site-packages/ray/rllib/env/vector_env.py", line 137, in reset_at
+    return self.envs[index].reset()
+  File "/home/bmil/flow/flow/envs/ring/wave_attenuation.py", line 255, in reset
+    return super().reset()
+  File "/home/bmil/flow/flow/envs/base.py", line 550, in reset
+    raise FatalFlowError(msg=msg)
+flow.utils.exceptions.FatalFlowError: 
+Not enough vehicles have spawned! Bad start?
+Missing vehicles / initial state:
+- rl_0: ('rl', 'bottom', 0, 11.272727272727273, 0)
+- human_20: ('human', 'bottom', 0, 0, 0)
+

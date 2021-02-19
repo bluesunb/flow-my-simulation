@@ -125,13 +125,14 @@ replace from 'output_policy_fc of SlimFC() internal activation_fn' to 'None'
 ## RL examples
 ### RLlib (for multiagent and single agent)
 
-for PPO(Proximal Policy Optimization) and DDPG(Deep Deterministic Policy Gradient) algorithm
+for PPO(Proximal Policy Optimization), DDPG(Deep Deterministic Policy Gradient) and
+TD3(Twin Delayed DDPG) Algorithm 
 ```shell script
 python train_rllib.py EXP_CONFIG --algorithm TD3
 ```
 
 where `EXP_CONFIG` is the name of the experiment configuration file, as located in directory`exp_configs/rl/singleagent`.<br/>
-In '[DDPG or PPO]', You can choose 'DDPG' or 'PPO' Algorithm.(Default: PPO)
+In '[DDPG or PPO or TD3]', You can choose 'DDPG' or 'PPO' or 'TD3' Algorithm. (Default: PPO)
 
 ### Visualizing Training Results
 If you want to visualizing after training by rllib(ray), 
@@ -148,7 +149,7 @@ It means the name of the checkpoint folder created in the experiment_name folder
 ### Results for training Ring Network
 #### TD3 (Twin Delayed DDPG)
 -Ring Network (ring length 220-270 fir training)
-![Ring_TD3_Tensorboard](https://user-images.githubusercontent.com/62413318/108316938-eb689c00-7200-11eb-9bf4-9b067dd17a29.png)
+![Ring_TD3_Tensorboard](https://user-images.githubusercontent.com/62413318/108316938-eb689c00-7200-11eb-9bf4-9b067dd17a29.png)<br/>
 Mean velocity in 22 Non-AVs system: 4.22m/s (ring length: 260)<br/>
 Mean velocity in 1 AV, 21 Non-AVs system: 4.68m/s, Mean cumulative reward: 2306 (ring length: 260) <br/>
 Use Stochastic Sampling Exploration method<br/>
@@ -300,7 +301,7 @@ Pytorch 1.6.0 이상의 version을 설치한다.
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
 ```
     cd
-    cd flow-autonomous-driving/WINTER2020/Code/Ring_Network-DDPG
+    cd flow-autonomous-driving/WINTER2020/Code/Ring_Network-TD3
     python visualizer_rllib.py ./results/TD3_WaveAttenuationPOEnv-v0_0_1002_2021-02-04_17-41-4261n93ah5 800
 ```
 
