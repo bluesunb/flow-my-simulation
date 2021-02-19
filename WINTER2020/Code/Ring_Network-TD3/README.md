@@ -148,7 +148,7 @@ It means the name of the checkpoint folder created in the experiment_name folder
 
 ### Results for training Ring Network
 #### TD3 (Twin Delayed DDPG)
--Ring Network (ring length 220-270 fir training)
+-Ring Network (ring length 220-270 fir training)<br/>
 ![Ring_TD3_Tensorboard](https://user-images.githubusercontent.com/62413318/108316938-eb689c00-7200-11eb-9bf4-9b067dd17a29.png)<br/>
 Mean velocity in 22 Non-AVs system: 4.22m/s (ring length: 260)<br/>
 Mean velocity in 1 AV, 21 Non-AVs system: 4.68m/s, Mean cumulative reward: 2306 (ring length: 260) <br/>
