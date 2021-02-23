@@ -2,8 +2,8 @@
 from flow.core.params import VehicleParams, SumoCarFollowingParams, SumoLaneChangeParams
 from flow.core.params import SumoParams, EnvParams, InitialConfig, NetParams
 from flow.controllers import RLController, IDMController, ContinuousRouter, SimLaneChangeController
-from flow.envs.ring.my_lane_change_accel import *
-from flow.networks.myring import RingNetwork
+from flow.envs.ring.multi_lane_change_accel import *
+from flow.networks.lane_change_ring import RingNetwork
 
 import os
 current_file_name_py = os.path.abspath(__file__).split('/')[-1]

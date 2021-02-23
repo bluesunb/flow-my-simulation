@@ -1,5 +1,5 @@
 from flow.envs.ring.lane_change_accel import LaneChangeAccelEnv
-from flow.core import myrewards as rewards
+from flow.core import lane_change_rewards as rewards
 
 from gym.spaces.box import Box
 from gym.spaces.tuple import Tuple
