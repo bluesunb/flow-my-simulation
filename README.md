@@ -7,6 +7,9 @@
 - ray-project(rllib) : https://github.com/ray-project/ray (need at least 0.8.6 is needed)
 - pytorch : https://pytorch.org/
 
+### 2020WINTER Documentation for FLOW
+-Korean Ver:[Google Docs] https://docs.google.com/document/d/1JXp9IZk9XOU8UUun1apQxTgFC8W9FMIEyt01cGWicwU/edit?usp=sharing
+
 ### How to Download Requirement
 #### Anaconda(Python3) installation:
 - Prerequisites
