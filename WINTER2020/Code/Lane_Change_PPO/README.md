@@ -299,7 +299,7 @@ ray rllib에서 제공하는 PPO 알고리즘은 -2000 이하나 +2000 이상의
 또한 Environment 마다 적절한 파라미터로 최적화할 필요가 있다. 그렇지 않으면 학습에 실패할 수 있다.
 
 #### Applying new environment for Lane Change Training
-`Lane_Change_PPO/requirements/my_lane_change_accel.py`에서 4가지의 Lane Change를 위한 Environment를 찾아 볼 수 있다.
+`Lane_Change_PPO/requirements/multi_lane_change_accel.py`에서 4가지의 Lane Change를 위한 Environment를 찾아 볼 수 있다.
 1. `MyLaneChangeAccelEnv`
 2. `MyLaneChangeAccelPOEnv`
 3. `TestLCEnv`
