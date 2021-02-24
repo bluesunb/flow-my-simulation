@@ -105,7 +105,6 @@ def punish_emergency_decel2(env):
             accel = env.k.vehicle.get_accel(env.k.vehicle.get_follower(rl)) or 0
             if accel < -0.2:
                 f = lambda x: x if x < 1 else np.log(x) + 1
-                # pen = dc3_p * np.log(abs(env.k.vehicle.get_accel(env.k.vehicle.get_follower(rl))) + 1)
                 pen = dc3_p * f(abs(accel))
                 reward -= pen
     return reward
@@ -156,13 +155,11 @@ def full_reward(env, rl_action):
                 if tailway < gap:
                     pen = unsafe_p * (gap - tailway) / gap
                     reward -= pen
-                    # reward -= unsafe_p
                     rwds['unsafe_penalty'] -= pen
             if dc3_p:
                 accel = env.k.vehicle.get_accel(env.k.vehicle.get_follower(rl)) or 0
                 if accel < -0.2:
                     f = lambda x: x if x<1 else np.log(x)+1
-                    # pen = dc3_p * np.log(abs(env.k.vehicle.get_accel(env.k.vehicle.get_follower(rl))) + 1)
                     pen = dc3_p * f(abs(accel))
                     reward -= pen
                     rwds['dc3_penalty'] -= pen

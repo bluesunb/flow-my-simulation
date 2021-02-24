@@ -92,31 +92,23 @@ class MyLaneChangeAccelEnv(LaneChangeAccelEnv):
         if 'rl_action_penalty' in args:
             if lc_action is not None and self.last_lane == vehicle.get_lane(rls) \
                 and any(lc_action[1::2]):
-                self.log['rl_action_penalty'].append(sum(lc_action))
-                # print(f'[ACT]: {lc_action}, {self.last_lane, vehicle.get_lane(rls)}')
+                self.log['rl_action_penalty'].append(1)
         if 'unsafe_penalty' in args:
             lc_taken = [rl for rl in rls if self.time_counter == vehicle.get_last_lc(rl)]
             if any(lc_taken):
                 self.log['unsafe_penalty'].extend(vehicle.get_tailway(lc_taken))
-                # print(f'[USF]: {vehicle.get_tailway(lc_taken)}')
         if 'dc3_penalty' in args:
-            # follower_accel = vehicle.get_accel(vehicle.get_follower(vehicle.get_rl_ids()[0]))
-            # if follower_accel is not None and follower_accel < 0:
-            #     print(f'[dd]: {follower_accel}')
-            # lc_taken = [rl for rl in rls if self.time_counter == vehicle.get_last_lc(rl)]
-            # if any(lc_taken):
-            #     self.log['dc3_penalty'].extend([vehicle.get_accel(follower) for follower in vehicle.get_follower(lc_taken)])
             accels = [vehicle.get_accel(vid) or 0 for vid in vehicle.get_human_ids()]
             accels = np.array(accels).clip(max=0)
             self.log['dc3_penalty'].extend(accels.tolist())
 
         if self.time_counter == self.env_params.horizon \
                 + self.env_params.warmup_steps - 1:
-            print(f'[rlp]: {sum(self.log["rl_action_penalty"])}')
-            print(f'[unsf]: {sum(self.log["unsafe_penalty"]) / (len(self.log["unsafe_penalty"]) or float("inf"))}')
-            print(f'[unsf]: {sum(np.array(self.log["unsafe_penalty"]) < 5)}')
-            print(f'[dc3]: {sum(self.log["dc3_penalty"]) / (len(self.log["dc3_penalty"]) or float("inf"))}')
-            print(f'[dc3]: {sum(np.array(self.log["dc3_penalty"]) < -0.2)}')
+            print(f'[rlps]: {sum(self.log["rl_action_penalty"])}')
+            print(f'[avg_distance]: {sum(self.log["unsafe_penalty"]) / (len(self.log["unsafe_penalty"]) or float("inf"))}')
+            print(f'[num_of_danger_lc]: {sum(np.array(self.log["unsafe_penalty"]) < 5)}')
+            print(f'[avg_decel]: {sum(self.log["dc3_penalty"]) / (len(self.log["dc3_penalty"]) or float("inf"))}')
+            print(f'[num_of_emergency_decel]: {sum(np.array(self.log["dc3_penalty"]) < -0.2)}')
 
 
 class TestLCEnv(MyLaneChangeAccelEnv):
@@ -141,6 +133,7 @@ class TestLCEnv(MyLaneChangeAccelEnv):
 
     def compute_reward(self, rl_actions, **kwargs):
         reward, rwds = rewards.full_reward(self, rl_actions)
+        # self.evaluate_rewards(rl_actions, self.initial_config.reward_params.keys())
 
         # if self.accumulated_reward is None:
         #     self.accumulated_reward = defaultdict(int)
