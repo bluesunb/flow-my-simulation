@@ -278,7 +278,7 @@ Pytorch 1.6.0 이상의 version을 설치한다.
 #### Training: TD3 + Ring 
 1. 원형 도로에서 TD3 알고리즘 기반으로 RL agent를 Learning 시키기 위해 터미널에 다음과 같은 명령어를 입력한다.
 ```
-   cd flow-autonomous-driving/WINTER2020/Code/Ring_Network-TD3
+   cd ~/flow-autonomous-driving/WINTER2020/Code/Ring_Network-TD3
    python train_rllib.py my_singleagent_ring 
 ```
 2. Training이 끝난 후 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. (visualizing을 하기 위해서는 40번 이상의 iter를 돌려야 볼 수 있다. )
@@ -292,16 +292,14 @@ Pytorch 1.6.0 이상의 version을 설치한다.
 
 3. Training이 끝난 후, 그래프 확인을 하고자 하면 다음과 같은 명령어를 입력한다. (명령어를 친 후 위의 experiment_name을 찾아서 본다.)
 ```
-  cd
-  cd ray_results
+  cd ~/ray_results
   tensorboard --logdir singleagent_ring
 ```
 
 #### High performance Example Code
 1. High performance Example Code의 training 결과를 visualizing 하려면, terminal에 다음과 같은 명령어를 입력한다. 
 ```
-    cd
-    cd flow-autonomous-driving/WINTER2020/Code/Ring_Network-TD3
+    cd ~/flow-autonomous-driving/WINTER2020/Code/Ring_Network-TD3
     python visualizer_rllib.py ./results/TD3_WaveAttenuationPOEnv-v0_0_1002_2021-02-04_17-41-4261n93ah5 800
 ```
 
