@@ -82,8 +82,8 @@ flow_params = dict(
             'only_rl': 0,
             'rl_mean_speed': 0.18,
             'simple_lc_penalty': 0.2,
-            'rl_action_penalty': 0.5,
-            'unsafe_penalty': 0.7,
-            'dc3_penalty': 0.4,
+            'rl_action_penalty': 0.4,
+            'unsafe_penalty': 0.6,
+            'dc3_penalty': 0.3,
 
 		},),)
