@@ -1,5 +1,4 @@
 """Visualizer for rllib experiments.
-
 Attributes
 ----------
 EXAMPLE_USAGE : str
@@ -32,11 +31,13 @@ from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
 
+from flow.envs.ring.my_lane_change_accel import MyLaneChangeAccelEnv
+from flow.core.kernel.vehicle import TraCIVehicle
+
 
 EXAMPLE_USAGE = """
 example usage:
     python ./visualizer_rllib.py /ray_results/experiment_dir/result_dir 1
-    
 Here the arguments are:
 1 - the path to the simulation results
 2 - the number of the checkpoint
@@ -45,7 +46,6 @@ Here the arguments are:
 
 def visualizer_rllib(args):
     """Visualizer for RLlib experiments.
-
     This function takes args (see function create_parser below for
     more detailed information on what information can be fed to this
     visualizer), and renders the experiment associated with it.
@@ -54,7 +54,6 @@ def visualizer_rllib(args):
         else args.result_dir[:-1]
 
     config = get_rllib_config(result_dir)
-    name = result_dir.split("/")[-2:]
 
     # check if we have a multiagent environment but in a
     # backwards compatible way
@@ -142,8 +141,7 @@ def visualizer_rllib(args):
     env_params = flow_params['env']
     env_params.restart_instance = False
     if args.evaluate:
-        # env_params.evaluate = True
-        flow_params['env'].evaluate = True
+        env_params.evaluate = True
 
     # lower the horizon if testing
     if args.horizon:
@@ -201,35 +199,31 @@ def visualizer_rllib(args):
     final_inflows = []
     mean_speed = []
     std_speed = []
-    rl_speed = []
-
-    log2_stack = defaultdict(list)
-
-    if args.evaluate:
-        env.unwrapped.env_params.evaluate = True
-
+    evaluated_rewards = defaultdict(list)
+    
     for i in range(args.num_rollouts):
         vel = []
         vel_dict = defaultdict(list)
-        timerange = []
+        timesteps = []
         state = env.reset()
         if multiagent:
             ret = {key: [0] for key in rets.keys()}
         else:
             ret = 0
         for _ in range(env_params.horizon):
-            vehicles = env.unwrapped.k.vehicle
+            vehicles: TraCIVehicle = env.unwrapped.k.vehicle
+            # speeds = vehicles.get_speed(vehicles.get_ids())
+            speeds = []
             ids = vehicles.get_ids()
-            rls = vehicles.get_rl_ids()
-            speeds = vehicles.get_speed(ids)
-
-            timerange.append(vehicles.get_timestep(ids[-1])/10000)
+            for vid in ids:
+                speed = vehicles.get_speed(vid)
+                vel_dict[vid].append(speed)
+                speeds.append(speed)
+            timesteps.append(vehicles.get_timestep(ids[-1])/10000)
+            
             # only include non-empty speeds
             if speeds:
                 vel.append(np.mean(speeds))
-                for veh_id, speed in zip(ids, speeds):
-                    vel_dict[veh_id].append(speed)
-
 
             if multiagent:
                 action = {}
@@ -237,8 +231,8 @@ def visualizer_rllib(args):
                     if use_lstm:
                         action[agent_id], state_init[agent_id], logits = \
                             agent.compute_action(
-                                state[agent_id], state=state_init[agent_id],
-                                policy_id=policy_map_fn(agent_id))
+                            state[agent_id], state=state_init[agent_id],
+                            policy_id=policy_map_fn(agent_id))
                     else:
                         action[agent_id] = agent.compute_action(
                             state[agent_id], policy_id=policy_map_fn(agent_id))
@@ -278,47 +272,6 @@ def visualizer_rllib(args):
         else:
             print('Round {}, Return: {}'.format(i, ret))
 
-        log2 = env.unwrapped.log2
-        for k in log2:
-            log2_stack[k].append(log2[k])
-
-        if i == args.num_rollouts-1 and args.render_mode != "no_render":
-            veh = list(vel_dict.keys())
-            plt.subplot(2, 1, 1)
-            plt.title('/'.join(name))
-            for v in veh[:-1]:
-                plt.plot(timerange, vel_dict[v])
-            plt.xlabel('timestep(s)')
-            plt.ylabel('speed(m/s)')
-            plt.legend(veh[:-1])
-            plt.grid(True)
-            # plt.show()
-
-            plt.subplot(2, 1, 2)
-            plt.plot(timerange, vel_dict[veh[-1]])
-            plt.xlabel('timestep(s)')
-            plt.ylabel('speed(m/s)')
-            plt.legend(veh[-1:])
-            plt.grid(True)
-            plt.show()
-
-        rl_speed = [np.mean(vel_dict[rl]) for rl in vehicles.get_rl_ids()]
-        log2.clear()
-
-    for k in log2_stack:
-        log2_stack[k] = np.mean(log2_stack[k]).round(3)
-
-    from time import strftime
-    time = strftime('%Y-%m-%d')
-    flow_autonomous_home = os.path.expanduser('~/log/')
-    with open(flow_autonomous_home + f'/log.csv', 'a') as f:
-        keys = ['\"'+str(k)+'\"' for k in log2_stack.keys()]
-        values = ['\"'+str(v)+'\"' for v in log2_stack.values()]
-        # f.write('time,name,'+','.join(keys)+'\n')
-        f.write(f'{time},{name[0]},{",".join(values)}\n')
-
-
-
     print('==== Summary of results ====')
     print("Return:")
     print(mean_speed)
@@ -335,12 +288,6 @@ def visualizer_rllib(args):
 
     print("\nSpeed, mean (m/s):")
     print(mean_speed)
-    print('')
-
-    #bmil edit
-    rls = vehicles.get_rl_ids()
-    [print(f'{rls[i]} Speed, mean (m/s): {rl_speed[i]}') for i in range(len(rls))]
-
     print('Average, std: {}, {}'.format(np.mean(mean_speed), np.std(
         mean_speed)))
     print("\nSpeed, std (m/s):")
