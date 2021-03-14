@@ -20,6 +20,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 import ray
+
 try:
     from ray.rllib.agents.agent import get_agent_class
 except ImportError:
@@ -31,7 +32,6 @@ from flow.utils.registry import make_create_env
 from flow.utils.rllib import get_flow_params
 from flow.utils.rllib import get_rllib_config
 from flow.utils.rllib import get_rllib_pkl
-
 
 EXAMPLE_USAGE = """
 example usage:
@@ -142,8 +142,7 @@ def visualizer_rllib(args):
     env_params = flow_params['env']
     env_params.restart_instance = False
     if args.evaluate:
-        # env_params.evaluate = True
-        flow_params['env'].evaluate = True
+        env_params.evaluate = True  # FIXME: this not works
 
     # lower the horizon if testing
     if args.horizon:
@@ -201,12 +200,12 @@ def visualizer_rllib(args):
     final_inflows = []
     mean_speed = []
     std_speed = []
-    rl_speed = []
+    rl_speed = []  # store rl controlled vehicle's speed
 
-    log2_stack = defaultdict(list)
+    log2_stack = defaultdict(list)  # This dict stores log2 data during rollouts
 
     if args.evaluate:
-        env.unwrapped.env_params.evaluate = True
+        env.unwrapped.env_params.evaluate = True    # To cover bug
 
     for i in range(args.num_rollouts):
         vel = []
@@ -223,13 +222,13 @@ def visualizer_rllib(args):
             rls = vehicles.get_rl_ids()
             speeds = vehicles.get_speed(ids)
 
-            timerange.append(vehicles.get_timestep(ids[-1])/10000)
+            timerange.append(vehicles.get_timestep(ids[-1]) / 10000)
+
             # only include non-empty speeds
             if speeds:
                 vel.append(np.mean(speeds))
                 for veh_id, speed in zip(ids, speeds):
                     vel_dict[veh_id].append(speed)
-
 
             if multiagent:
                 action = {}
@@ -282,7 +281,8 @@ def visualizer_rllib(args):
         for k in log2:
             log2_stack[k].append(log2[k])
 
-        if i == args.num_rollouts-1 and args.render_mode != "no_render":
+        # plot non-rl's speed and rl's speed graph
+        if i == args.num_rollouts - 1 and args.render_mode != "no_render":
             veh = list(vel_dict.keys())
             plt.subplot(2, 1, 1)
             plt.title('/'.join(name))
@@ -303,21 +303,19 @@ def visualizer_rllib(args):
             plt.show()
 
         rl_speed = [np.mean(vel_dict[rl]) for rl in vehicles.get_rl_ids()]
-        log2.clear()
 
     for k in log2_stack:
         log2_stack[k] = np.mean(log2_stack[k]).round(3)
 
+    # export the log2_stack
     from time import strftime
     time = strftime('%Y-%m-%d')
     flow_autonomous_home = os.path.expanduser('~/log/')
     with open(flow_autonomous_home + f'/log.csv', 'a') as f:
-        keys = ['\"'+str(k)+'\"' for k in log2_stack.keys()]
-        values = ['\"'+str(v)+'\"' for v in log2_stack.values()]
+        keys = ['\"' + str(k) + '\"' for k in log2_stack.keys()]
+        values = ['\"' + str(v) + '\"' for v in log2_stack.values()]
         # f.write('time,name,'+','.join(keys)+'\n')
         f.write(f'{time},{name[0]},{",".join(values)}\n')
-
-
 
     print('==== Summary of results ====')
     print("Return:")
@@ -337,7 +335,7 @@ def visualizer_rllib(args):
     print(mean_speed)
     print('')
 
-    #bmil edit
+    # bmil edit
     rls = vehicles.get_rl_ids()
     [print(f'{rls[i]} Speed, mean (m/s): {rl_speed[i]}') for i in range(len(rls))]
 

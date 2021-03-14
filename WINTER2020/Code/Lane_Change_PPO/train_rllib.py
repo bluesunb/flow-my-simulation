@@ -101,7 +101,8 @@ def setup_exps_rllib(flow_params,
     config["kl_target"] = 0.02  # d_target
     config["num_sgd_iter"] = 15
     config["sgd_minibatch_size"] = 512
-    config['lr']=5e-7
+    # config['lr']=5e-7
+    config['lr']=1e-6
     config["clip_param"] = 0.2
 
     config['train_batch_size']=3000
@@ -172,7 +173,7 @@ def train_rllib(submodule, flags, restore_path=None):
     ray.init(num_cpus=n_cpus + 1, num_gpus=1, object_store_memory=200 * 1024 * 1024)
     # checkpoint and num steps setting
     if alg_run=="PPO":
-        flags.num_steps = 2000
+        flags.num_steps = 1500
         checkpoint_freq = 100
     elif alg_run=="DDPG":
         flags.num_steps = 1000

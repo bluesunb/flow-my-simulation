@@ -305,6 +305,67 @@ ray rllib에서 제공하는 PPO 알고리즘은 -2000 이하나 +2000 이상의
 3. `TestLCEnv`
 4. `TestLCPOEnv`
 
+#Appendix
+
+부록에서는 바로 Lane change를 위한 설정들을 익히고 커스터마이징 할 수 있도록 한다.
+
+##1. Experiment Configuration
+이 절은 학습을 진행하기 위해 필요한 파라미터 설정을 설명한다.
+###Start up
+
+Exp_config 파일은 학습 시 필요한 설정 파라미터를 Ray에 넘겨주는 역할을 한다. Ray는 이 파일로부터 flow_params 객체를 받아 학습 환경을 설정한다.  
+Exp_config 파일 내부에는 다음 설정 파라미터가 위치해 있다.
+
+1. 학습 환경(Environment)에 대한 정보 : env_name, env
+2. 학습 환경에 배치할 차량에 대한 정보 : veh
+3. 학습 환경 내부의 도로망(Network) 정보 : net
+4. 학습 시뮬레이션에 대한 정보 : sim
+5. 기타 추가적인 정보 : initial
+
+Exp_config 파일은 `Lane_Change_PPO/exp_configs/` 에서 찾아볼 수 있다.
+
+### Vehicle setup
+학습 설정 파일에서 차량에 관련한 세팅은 VehicleParams 객체를 통해서 이루어진다.
+Lane change 를 위해서 다음의 파라미터를 설정할 수 있다.
+* veh_id : 차량 그룹의 id. (그룹 내 차량들은 "{veh_id}_[int]" 형식을 가진다.)
+* acceleration_controller : 차량의 accel 을 컨트롤하는 객체.
+* lane_change_controller : 차량의 lane change 를 컨트롤 하는 객체
+* routing controller : 차량의 주행 경로를 컨트롤하는 객체
+* num_vehicles : 그룹의 차량 수
+* initial_speed : 시뮬레이션 시작 시 차량의 속
+
+### EnvParams setup
+학습 설정 파일에서 학습 환경에 관련한 세팅은 EnvParams 객체를 통해서 이루어진다. 
+여기서는 Horizon, Warmup steps, Evaluate 여부 등 환경 설정 중 시뮬레이션과 관련된 설정이 주로 이루어지며,
+새로운 학습 환경을 만들거나 학습 환경 자체를 커스터마이징을 하고자 하면, `env_name`에 넘겨준 gym.Env 객체에서 커스터마이징 해야 한다.
+
+### NetParams setup
+학습 설정 파일에서 도로망에 관련한 세팅은 NetParams 객체를 통해서 이루어진다. 
+
+### InitialCongif setup
+학습 설정 파일에서 시뮬레이션 초기화와 관련한 세팅은 InitialConfig 객체를 통해서 이루어진다.
+이 객체를 통해 차량의 배치(spacing), 차량의 배치 밀도(bunching) 등을 설정할 수 있다.
+
+## 2. New Environment
+새로운 학습 환경을 만들고자 한다면, flow.envs.base.Env 객체를 상속해야 한다.
+여기서 <b>action_space</b>, <b>observation_space</b> 를 정의할 수 있으며 (gym.space) action의 적용과 리워드 처리 등을 직접 커스터마이징 할 수 있다.
+
+새롭게 커스터마이징 하였던 환경을 `flow/envs/ring/my_lance_change_accel.py`에서 찾을 수 있다.
+
+## 3. New Reward
+새로운 환경을 만들 때 새로운 보상 함수 체계를 정의하려면 `flow.core.rewards.py`에 정의된 보상함수들을 고치거나 새롭게 정의해야 한다.
+
+새롭게 커스터마이징 하였던 리워드를 `flow.core.lane_change_rewards.py` 에서 찾을 수 있다.
+
+## 4. New Network
+새로운 도로망을 만들고자 한다면, flow.networks.base.Network 객체를 상속해야 한다.
+여기서 도로망의 edge를 정의할 수 있으며 도로의 모양을 설정할 수 있다.
+또한 도로 내의 차량 배치도 정의할 수 있다.
+
+새롭게 커스터마이징 히였던 도로망을 `flow/networks/lane_change_ring.py` 에서 찾을 수 있다.
+
+
+###
 
 
 ### Encrypted 2020 SUMMER Documentation for Flow 

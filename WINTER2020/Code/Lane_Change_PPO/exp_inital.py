@@ -1,3 +1,10 @@
+"""
+이 파일은 exp_configs/rl/singleagent/exps/exps.txt 에 reward_params를 빠르게 세팅하기 위해 만든 파일입니다.
+exps.txt에 exp_config name, reward_params 를 \t 로 구분하여 적으면 그 reward_params와 exp_config_name으로 세팅된 새로운 파일을 만들어줍니다.
+
+console을 통해 현재 위치에서 python exp_initial.py 를 실행해보세요.
+"""
+
 import os
 import sys
 HOMEPATH = os.path.expanduser('~')
